@@ -1,68 +1,115 @@
-const db = require('./config/db');
-const moment = require('moment');
+const db = require("./config/db");
+const moment = require("moment");
 const bcrypt = require("bcrypt");
 
 const adodb = {
+  getColumnNames(tableName) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const [rows] = await db.query(`DESCRIBE ${tableName}`);
+        const columnNames = rows.map((row) => row.Field);
+        return resolve(columnNames);
+      } catch (err) {
+        return reject(err.message);
+      }
+    });
+  },
 
-    getColumnNames(tableName) {
-        return new Promise(async (resolve, reject) =>{
-            try {
-                const [rows] = await db.query(`DESCRIBE ${tableName}`);
-                const columnNames = rows.map(row => row.Field);
-                return resolve(columnNames);
-            } catch (err) {
-                return reject(err.message);
-            }
-        });
-    },
+  checkRecord(table_name, primary_key, id) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let [rows] = await db.query(
+          `SELECT * FROM ${table_name} WHERE ${primary_key} = '${id}' LIMIT 1`
+        );
+        return resolve(rows.length);        
+      } catch (err) {
+        return reject(err.message);
+      }
+    });
+  },
 
-    checkRecord(table_name, primary_key, id) {
-        return new Promise(async (resolve) =>{
-            try {
-                await db.query(`SELECT * FROM ${table_name} WHERE ${primary_key} = '${id}' LIMIT 1`);
-                return resolve(1);
-            } catch (err) {
-                return resolve(0);
-            }
-        });
-    },
-
-    async insertSql(){
-        try{
-          const x = await this.getColumnNames('user_login');
-          return x;
+  async insertSql(table_name, data) {
+    try {
+      let columnHolder = [], valueHolder = [];
+      const columns = await this.getColumnNames(table_name);
+    
+      // check columnswith request data
+      for (let key in data) {
+        if (columns.includes(key)) {
+          columnHolder.push(key);
+          valueHolder.push(data[key]);
         }
-        catch(err){
-           return err
+      }
+
+      let sql = `INSERT INTO ${table_name} (${columnHolder.join(', ')}) VALUES (${valueHolder.map(val => (typeof val === 'string') ? `'${val.replace(/'/g, "\\'")}'` : val).join(', ')});`;
+      return sql;
+
+    } catch (err) {
+      return err;
+    }
+  },
+
+  async updateSql(table_name, primary_key, data) {
+    try {
+      let columnHolder = [], valueHolder = [];
+      const columns = await this.getColumnNames(table_name);
+    
+      // check columnswith request data
+      for (let key in data) {
+        if (columns.includes(key)) {
+          columnHolder.push(key);
+          valueHolder.push(data[key]);
         }
-    },
+      }
 
-    async saveData(table_name, primary_key, data){
-        try{
-            let current_date_time = moment().format('YYYY-MM-DD hh:mm:ss');
+      let sql = `INSERT INTO ${table_name} (${columnHolder.join(', ')}) VALUES (${valueHolder.map(val => (typeof val === 'string') ? `'${val.replace(/'/g, "\\'")}'` : val).join(', ')});`;
+      return sql;
 
-            let id =  data.hasOwnProperty(primary_key) ? data[primary_key] : -1;
+    } catch (err) {
+      return err;
+    }
+  },
 
-            let is_record = await this.checkRecord(table_name, primary_key, id);
+  saveData(table_name, primary_key, data) {
 
-            if(is_record == 1){
-                // Update query
-                data['updated_on'] = current_date_time;
-                data['updated_by'] = data['current_user_login_id'];
+    return new Promise(async (resolve, reject) =>{
 
-            }
-            else{
-                //  Insert query
+    let query = null;
+    try {
+      let current_date_time = moment().format("YYYY-MM-DD hh:mm:ss");
+     
+      let id = data.hasOwnProperty(primary_key) ? data[primary_key] : -1;
+      
+      let is_record = await this.checkRecord(table_name, primary_key, id);
 
-            }
+      if (is_record != 0) {
+        // Update query
+        data["updated_on"] = current_date_time;
+        data["updated_by"] = data.userDetails.user_login_id;
+        query = await this.updateSql(table_name, primary_key ,data);
 
+      } else {
+        //  Insert query
+       delete data[primary_key];
+       data['created_by'] = data.userDetails.user_login_id;
+       query = await this.insertSql(table_name, data);
+      }
 
-        }
-        catch(err){
-           
-        }
+      if(query != null){
+        const [result] = await db.execute(query);
+        return resolve(result);
+      }
+      else{
+        throw new Error('Data Failed to Fetch');
+      }
+
+    } catch (err) {
+        return reject(err.message);
     }
 
-}
+  });
+
+  },
+};
 
 module.exports = adodb;

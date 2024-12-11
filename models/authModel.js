@@ -18,8 +18,8 @@ const authModel = {
                 return reject('Password is incorrect');
             }
 
-            let access_token  = jwt.sign({user_login_id, user_name, m_user_type_id, email_id}, process.env.JWT_TOKEN_SECRET, {'expiresIn':'1h'});
-            let refresh_token  = jwt.sign({user_login_id, user_name, m_user_type_id, email_id}, process.env.JWT_REVERSE_TOKEN_SECRET, {'expiresIn':'2 days'});
+            let access_token  = jwt.sign({user_login_id, user_name, m_user_type_id}, process.env.JWT_TOKEN_SECRET, {'expiresIn':'1h'});
+            let refresh_token  = jwt.sign({user_login_id, user_name, m_user_type_id}, process.env.JWT_REVERSE_TOKEN_SECRET, {'expiresIn':'2 days'});
 
             return resolve({access_token, refresh_token});
         }

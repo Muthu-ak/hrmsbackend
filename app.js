@@ -4,13 +4,15 @@ const app = express();
 const dotenv = require("dotenv");
 const path = require("path");
 dotenv.config({path:path.join(__dirname, 'config', 'config.env')});
-const jwt = require('jsonwebtoken');
+const authMiddleware = require("./middleware/authMiddleware");
 
 app.use(cors());
 app.use(express.json());
 
 const authRoutes = require("./routes/authRoutes");
 app.use('/auth', authRoutes);
+
+app.use(authMiddleware);
 
 const userRoutes = require("./routes/userRoutes");
 app.use('/user', userRoutes);

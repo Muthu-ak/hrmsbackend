@@ -4,5 +4,6 @@ const router = express.Router();
 
 // Define routes
 router.post('/login', authController.login);
+router.post('/token', authController.token);
 
 module.exports = router;

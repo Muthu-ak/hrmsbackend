@@ -1,5 +1,5 @@
 const userModel = require('../models/userModel');
-
+const adodb = require('../adodb');
 const userController = {
 
   async getUserList(req, res){
@@ -12,9 +12,8 @@ const userController = {
   },
 
   async saveUser(req, res){
-    const { name, email, password } = req.body;
     try {
-      const newUser = await userModel.createUser({ name, email, password });
+      const newUser = await adodb.saveData('user_login', 'user_login_id', req.body);
       res.status(201).json(newUser);
     } catch (err) {
       res.status(500).json({ error: 'Internal Server Error' });

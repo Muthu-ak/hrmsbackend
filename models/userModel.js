@@ -1,45 +1,12 @@
 
 const db = require('../config/db');
-const adodb = require('../adodb');
 
 const userModel = {
-  // Get all users
+
   async getUserList() {
-    const x = await adodb.insertSql();
-    console.log(x);
-    return x;
+    const [rows] = await db.query("SELECT ul.user_login_id, ul.user_name, ul.email_id, ul.m_user_type_id FROM user_login ul WHERE ul.is_deleted = 0");
+    return rows;
   },
-
-  // Get user by ID
-  async getUserById(userId) {
-    const [rows] = await db.execute('SELECT * FROM users WHERE id = ?', [userId]);
-    return rows[0];
-  },
-
-  // Create a new user
-  async createUser(userData) {
-    const { name, email, password } = userData;
-    const result = await db.execute(
-      'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-      [name, email, password]
-    );
-    return result[0];
-  },
-
-  // Update a user
-  async updateUser(userId, userData) {
-    const { name, email, password } = userData;
-    const result = await db.execute(
-      'UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?',
-      [name, email, password, userId]
-    );
-    return result[0];
-  },
-
-  async deleteUser(userId) {
-    const result = await db.execute('DELETE FROM users WHERE id = ?', [userId]);
-    return result[0];
-  }
 
 }
 
