@@ -4,18 +4,24 @@ const app = express();
 const dotenv = require("dotenv");
 const path = require("path");
 dotenv.config({path:path.join(__dirname, 'config', 'config.env')});
+
+// Routes Include
+const authRoutes = require("./routes/authRoutes");
+const masterRoutes = require("./routes/masterRoutes");
+const userRoutes = require("./routes/userRoutes");
+
+// Middleware
 const authMiddleware = require("./middleware/authMiddleware");
 
 app.use(cors());
 app.use(express.json());
 
-const authRoutes = require("./routes/authRoutes");
+// Routes Setup
 app.use('/auth', authRoutes);
 
-app.use(authMiddleware);
+app.use('/master', authMiddleware, masterRoutes);
+app.use('/user', authMiddleware, userRoutes);
 
-const userRoutes = require("./routes/userRoutes");
-app.use('/user', userRoutes);
 
 app.listen(process.env.PORT, (err)=>{
     if(err) throw err;

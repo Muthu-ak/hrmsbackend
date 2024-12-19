@@ -5,9 +5,9 @@ const authController = {
   async login(req, res){
       try {
         const users = await authModel.login(req.body);
-        res.status(200).json(users);
+        return res.status(200).json(users);
       } catch (err) {
-        res.status(400).json({ error: err});
+        return res.status(404).json({ error: err});
       }
   },
 
@@ -18,7 +18,7 @@ const authController = {
         jwt.verify(token , process.env.JWT_REVERSE_TOKEN_SECRET, (err, decode)=>{
           if(err) throw new Error('Refresh Token Expired.');
           let x = {
-            user_login_id: decode.user_login_id,
+            user_type: decode.user_type,
             user_name: decode.user_name,
             m_user_type_id: decode.m_user_type_id
           }
