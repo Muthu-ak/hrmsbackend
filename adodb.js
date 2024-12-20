@@ -71,7 +71,7 @@ const adodb = {
   },
 
   saveData(table_name, primary_key, data) {
-
+ 
     return new Promise(async (resolve, reject) =>{
 
     let query = null;
@@ -95,9 +95,13 @@ const adodb = {
        query = await this.insertSql(table_name, data);
       }
 
+      console.log(query);
+
       if(query != null){
         const [result] = await db.execute(query);
-        return resolve(result);
+
+        let id =  is_record > 0 ? data[primary_key] : result['insertId'];
+        return resolve(id);
       }
       else{
         throw new Error('Data Failed to Fetch');

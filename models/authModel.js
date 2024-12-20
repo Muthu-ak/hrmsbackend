@@ -13,7 +13,7 @@ const authModel = {
                         INNER JOIN m_user_type mut ON mut.m_user_type_id = ul.m_user_type_id AND mut.is_deleted = 0
                         WHERE ul.is_deleted = 0 AND ul.email_id = ?`, [email_id]);
 
-            const {user_login_id, user_name, m_user_type_id, encrypt_pass_word} = rows[0];
+            const {user_login_id, user_name, m_user_type_id, encrypt_pass_word, user_type} = rows[0];
 
             const is_password_valid = await bcrypt.compare(pass_word, encrypt_pass_word);
             
@@ -21,8 +21,8 @@ const authModel = {
                 return reject('Password is incorrect');
             }
 
-            let access_token  = jwt.sign({user_login_id, user_name, m_user_type_id}, process.env.JWT_TOKEN_SECRET, {'expiresIn':'1h'});
-            let refresh_token  = jwt.sign({user_login_id, user_name, m_user_type_id}, process.env.JWT_REVERSE_TOKEN_SECRET, {'expiresIn':'2 days'});
+            let access_token  = jwt.sign({user_login_id, user_name, m_user_type_id, user_type}, process.env.JWT_TOKEN_SECRET, {'expiresIn':'1h'});
+            let refresh_token  = jwt.sign({user_login_id, user_name, m_user_type_id, user_type}, process.env.JWT_REVERSE_TOKEN_SECRET, {'expiresIn':'2 days'});
 
             return resolve({access_token, refresh_token, msg:'Successfully Logged.'});
         }

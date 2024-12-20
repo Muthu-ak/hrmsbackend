@@ -20,6 +20,7 @@ const authController = {
           let x = {
             user_type: decode.user_type,
             user_name: decode.user_name,
+            user_login_id: decode.user_login_id,
             m_user_type_id: decode.m_user_type_id
           }
           let access_token = jwt.sign(x, process.env.JWT_TOKEN_SECRET, {expiresIn:'1h'});
