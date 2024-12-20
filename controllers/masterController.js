@@ -18,7 +18,7 @@ const masterController = {
         }
     },
     async designation(req, res){
-        const {m_department_id} = req.body;
+        const m_department_id = req.query.m_department_id;
         if(!m_department_id){
             res.status(400).json({error:'Missing department'});
         }
