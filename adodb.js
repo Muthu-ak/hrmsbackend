@@ -35,14 +35,20 @@ const adodb = {
     
       // check columnswith request data
       for (let key in data) {
+        let value = data[key];
         if (columns.includes(key)) {
           columnHolder.push(key);
-          valueHolder.push(data[key]);
+
+          if (typeof value === 'string') {
+            valueHolder.push(`${value.replace(/'/g, "\\'")}`);
+          } else {
+            valueHolder.push(value);
+          }
         }
       }
-
-      let sql = `INSERT INTO ${table_name} (${columnHolder.join(', ')}) VALUES (${valueHolder.map(val => (typeof val === 'string') ? `'${val.replace(/'/g, "\\'")}'` : val).join(', ')});`;
-      return sql;
+     
+      let sql = `INSERT INTO ${table_name} (${columnHolder.join(', ')}) VALUES (${valueHolder.map(val => '?').join(', ')});`;
+      return {sql, valueHolder};
 
     } catch (err) {
       return err;
@@ -50,20 +56,26 @@ const adodb = {
   },
 
   async updateSql(table_name, primary_key, data) {
+    
     try {
       let columnHolder = [], valueHolder = [];
       const columns = await this.getColumnNames(table_name);
-    
+      
       // check columnswith request data
       for (let key in data) {
-        if (columns.includes(key)) {
-          columnHolder.push(key);
-          valueHolder.push(data[key]);
+        let value = data[key];
+        if (columns.includes(key)) { 
+          columnHolder.push(` ${key} = ? `);
+          if (typeof value === 'string') {
+            valueHolder.push(`${value.replace(/'/g, "\\'")}`);
+          } else {
+            valueHolder.push(value);
+          }
         }
       }
-
-      let sql = `INSERT INTO ${table_name} (${columnHolder.join(', ')}) VALUES (${valueHolder.map(val => (typeof val === 'string') ? `'${val.replace(/'/g, "\\'")}'` : val).join(', ')});`;
-      return sql;
+      
+      let sql = `UPDATE ${table_name} SET ${columnHolder.map(val => val).join(",")} WHERE ${primary_key} = ${data[primary_key]}`;
+      return {sql, valueHolder};
 
     } catch (err) {
       return err;
@@ -71,35 +83,33 @@ const adodb = {
   },
 
   saveData(table_name, primary_key, data) {
- 
+    
     return new Promise(async (resolve, reject) =>{
 
-    let query = null;
+    let query = {};
     try {
       let current_date_time = moment().format("YYYY-MM-DD hh:mm:ss");
      
       let id = data.hasOwnProperty(primary_key) ? data[primary_key] : -1;
       
       let is_record = await this.checkRecord(table_name, primary_key, id);
-
-      if (is_record != 0) {
+      console.log(is_record);
+      if (is_record > 0) {
         // Update query
         data["updated_on"] = current_date_time;
         data["updated_by"] = data.userDetails.user_login_id;
         query = await this.updateSql(table_name, primary_key ,data);
-
+       
       } else {
         //  Insert query
        delete data[primary_key];
        data['created_by'] = data.userDetails.user_login_id;
        query = await this.insertSql(table_name, data);
       }
-
-      console.log(query);
-
-      if(query != null){
-        const [result] = await db.execute(query);
-
+      
+      if(query.hasOwnProperty('sql')){
+        const [result] = await db.query(query.sql, query.valueHolder);
+       
         let id =  is_record > 0 ? data[primary_key] : result['insertId'];
         return resolve(id);
       }

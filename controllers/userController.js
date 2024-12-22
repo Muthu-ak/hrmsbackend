@@ -22,9 +22,10 @@ const userController = {
 
     const {first_name, last_name, user_login_id, emp_code, date_of_joining, date_of_birth} = req.body;
 
+    req.body['user_name'] = `${first_name} ${last_name}`;
+
     // Only New User Create
     if(user_login_id == -1){
-      req.body['user_name'] = `${first_name} ${last_name}`;
       req.body['pass_word'] = await bcrypt.hash(`${first_name}@${emp_code}` , 10);
     }
     
@@ -38,7 +39,7 @@ const userController = {
       req.body['user_login_id'] = id;
       const employee_id = await adodb.saveData('employees', 'employee_id', req.body);
       await db.query('COMMIT');
-      res.status(201).json({'msg':'Successfully Saved', 'user_login_id':id, 'employee_id':employee_id });
+      res.status(201).json({'msg':`${user_login_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'user_login_id':id, 'employee_id':employee_id });
 
     } catch (err) {
 

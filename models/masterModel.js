@@ -10,7 +10,7 @@ const masterModel = {
        return rows;
     },
     async userType(){
-       let [rows] = await db.execute("SELECT CAST(mut.m_user_type_id AS CHAR) AS 'value', mut.user_type AS label FROM m_user_type mut WHERE mut.is_deleted = 0 AND mut.m_user_type_id <> 1000");
+       let [rows] = await db.execute("SELECT CAST(mut.m_user_type_id AS CHAR) AS 'value', mut.user_type AS label FROM m_user_type mut WHERE mut.is_deleted = 0 AND mut.m_user_type_id < 100");
        return rows;
     },
     async department(){
