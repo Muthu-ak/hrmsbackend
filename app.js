@@ -9,6 +9,7 @@ dotenv.config({path:path.join(__dirname, 'config', 'config.env')});
 const authRoutes = require("./routes/authRoutes");
 const masterRoutes = require("./routes/masterRoutes");
 const userRoutes = require("./routes/userRoutes");
+const leaveRoutes = require("./routes/leaveRoutes");
 
 // Middleware
 const authMiddleware = require("./middleware/authMiddleware");
@@ -21,6 +22,7 @@ app.use('/auth', authRoutes);
 
 app.use('/master', authMiddleware, masterRoutes);
 app.use('/user', authMiddleware, userRoutes);
+app.use('/leave', authMiddleware, leaveRoutes);
 
 
 app.listen(process.env.PORT, (err)=>{

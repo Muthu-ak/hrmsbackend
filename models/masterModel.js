@@ -58,14 +58,6 @@ const masterModel = {
         let [rows] = await db.execute("SELECT CAST(mlt.m_leave_type_id AS CHAR) AS 'value', mlt.leave_type AS label FROM m_leave_type mlt WHERE mlt.is_deleted = 0");
         return rows;
     },
-    async holiday(pagesize, offset){
-        let limit = `LIMIT ${pagesize} OFFSET ${offset}`;
-
-        let [count] = await db.execute(`SELECT count(h.holiday_id) as counts FROM holiday h WHERE h.is_deleted = 0`);
-        let [rows] = await db.execute(`SELECT ROW_NUMBER() OVER(ORDER BY h.holiday_date DESC) as s_no,  h.holiday_id, h.holiday_title, DATE_FORMAT(h.holiday_date, '%d-%b-%Y') as holiday_date,
-          DATE_FORMAT(h.holiday_date, '%W') AS holiday_day FROM holiday h WHERE h.is_deleted = 0 ${limit}`);
-         return {data:rows, totalRecord:count[0]['counts']};
-    },
 }
 
 module.exports = masterModel;

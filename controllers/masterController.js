@@ -1,6 +1,5 @@
 const masterModel = require('../models/masterModel');
-const adodb = require('../adodb');
-const moment = require('moment');
+
 const masterController = {
     async userType(req, res){
         try {
@@ -75,30 +74,6 @@ const masterController = {
             res.status(200).json({gender, bloodGroup, userType, department, employeeStatus, banks, bankAccountType, documentNames});
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
-        }
-    },
-    async holiday(req, res){
-        let params = req.query;
-        let cal = (params.currentpage - 1) * params.postperpage;
-        let offset = cal < 0 ? 0 : cal;
-        try {
-            const data = await masterModel.holiday(params.postperpage, offset);
-            res.status(200).json(data);
-        } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-    },
-    async saveHoliday(req, res){
-        let pk = req.body.holiday_id;
-        req.body['holiday_date'] = moment(req.body['holiday_date']).format("YYYY-MM-DD");
-        try{
-            let id = await adodb.saveData("holiday","holiday_id",req.body);
-            let msg = pk < 0 ? "Added Successfully" : "Updated Successfully";
-            let code = pk > 0 ? 200 : 201;
-            res.status(code).json({'holiday_id': id, "msg": msg});
-        }
-        catch(err){
-            res.status(400).json({"msg":err});
         }
     }
 }
