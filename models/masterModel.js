@@ -58,6 +58,14 @@ const masterModel = {
         let [rows] = await db.execute("SELECT CAST(mlt.m_leave_type_id AS CHAR) AS 'value', mlt.leave_type AS label FROM m_leave_type mlt WHERE mlt.is_deleted = 0");
         return rows;
     },
+    async clients(){
+        let [rows] = await db.execute("SELECT CAST(c.client_id AS CHAR) AS 'value' , c.client_name AS 'label' FROM clients c WHERE c.is_deleted = 0");
+        return rows;
+    },
+    async userList(params){
+        let [rows] = await db.execute("SELECT CAST(ul.user_login_id AS CHAR) AS 'value' , ul.user_name AS 'label' FROM user_login ul WHERE ul.is_deleted = 0 AND ul.m_user_type_id = ?", [params.m_user_type_id]);
+        return rows;
+    },
 }
 
 module.exports = masterModel;

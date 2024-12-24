@@ -75,7 +75,24 @@ const masterController = {
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
         }
-    }
+    },
+    async clients(req, res){
+        console.log("ji");
+        try {
+            const data = await masterModel.clients();
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+    async userList(req, res){
+        try {
+            const data = await masterModel.userList(req.query);
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
 }
 
 module.exports = masterController;

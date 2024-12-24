@@ -11,6 +11,8 @@ router.get('/attendanceStatus', masterController.attendanceStatus);
 router.get('/leaveStatus', masterController.leaveStatus);
 router.get('/leaveType', masterController.leaveType);
 router.get('/employeeFormMasters', masterController.employeeFormMasters);
+router.get('/clients', masterController.clients);
+router.get('/userList', masterController.userList);
 
 
 module.exports = router;

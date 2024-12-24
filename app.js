@@ -10,6 +10,8 @@ const authRoutes = require("./routes/authRoutes");
 const masterRoutes = require("./routes/masterRoutes");
 const userRoutes = require("./routes/userRoutes");
 const leaveRoutes = require("./routes/leaveRoutes");
+const announcementRoutes = require("./routes/announcementRoutes");
+const projectRoutes = require("./routes/projectRoutes");
 
 // Middleware
 const authMiddleware = require("./middleware/authMiddleware");
@@ -23,6 +25,8 @@ app.use('/auth', authRoutes);
 app.use('/master', authMiddleware, masterRoutes);
 app.use('/user', authMiddleware, userRoutes);
 app.use('/leave', authMiddleware, leaveRoutes);
+app.use('/announcement', authMiddleware, announcementRoutes);
+app.use('/project', authMiddleware, projectRoutes);
 
 
 app.listen(process.env.PORT, (err)=>{

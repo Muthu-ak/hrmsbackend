@@ -1,92 +1,84 @@
-const leaveModel = require("../models/leaveModel");
+const projectModel = require("../models/projectModel");
 const adodb = require('../adodb');
-const moment = require('moment');
 
-const leaveController = {
-    async holiday(req, res){
+const projectController = {
+    async clients(req, res){
         let params = req.query;
         let cal = (params.currentpage - 1) * params.postperpage;
         let offset = cal < 0 ? 0 : cal;
 
-        let orderBY = "ORDER BY h.created_on DESC";
+        let orderBY = "ORDER BY c.created_on DESC";
         if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
-            if(params.sorting['accessor'] == 'holiday_day'){
-                orderBY = `ORDER BY DATE_FORMAT(h.holiday_date, '%W') ${params.sorting["direction"]}`;
-            }
-            else{
-                orderBY = `ORDER BY h.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
-            }
+            orderBY = `ORDER BY c.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
         }
 
         try {
-            const data = await leaveModel.holiday(params.postperpage, offset, orderBY);
+            const data = await projectModel.clients(params.postperpage, offset, orderBY);
             res.status(200).json(data);
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
-    async viewHoliday(req, res){
+    async viewClient(req, res){
         try {
-            const data = await leaveModel.viewHoliday(req.query);
+            const data = await projectModel.viewClient(req.query);
             res.status(200).json(data);
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
-    async saveHoliday(req, res){
-        let pk = req.body.holiday_id;
-        if(req.body.hasOwnProperty('holiday_date')){
-            req.body['holiday_date'] = moment(req.body['holiday_date']).format("YYYY-MM-DD");
-        }
-       
+    async saveClient(req, res){
+        let pk = req.body.client_id;
+        
         try{
-            let id = await adodb.saveData("holiday","holiday_id",req.body);
+            let id = await adodb.saveData("clients","client_id",req.body);
 
             let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
 
             let code = pk > 0 ? 200 : 201;
 
-            res.status(code).json({'holiday_id': id, "msg": msg});
+            res.status(code).json({'client_id': id, "msg": msg});
         }
         catch(err){
             res.status(400).json({"msg":err});
         }
     },
-    async leaveType(req, res){
+    async projects(req, res){
         let params = req.query;
         let cal = (params.currentpage - 1) * params.postperpage;
         let offset = cal < 0 ? 0 : cal;
 
-        let orderBY = "ORDER BY mlt.created_on DESC";
+        let orderBY = "ORDER BY pt.created_on DESC";
         if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
-            orderBY = `ORDER BY mlt.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
+            orderBY = `ORDER BY pt.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
         }
 
         try {
-            const data = await leaveModel.leaveType(params.postperpage, offset, orderBY);
+            const data = await projectModel.projects(params.postperpage, offset, orderBY);
             res.status(200).json(data);
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
-    async viewLeaveType(req, res){
+    async viewProject(req, res){
         try {
-            const data = await leaveModel.viewLeaveType(req.query);
+            const data = await projectModel.viewProject(req.query);
             res.status(200).json(data);
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
-    async saveLeaveType(req, res){
-        let pk = req.body.m_leave_type_id;
+    async saveProject(req, res){
+        let pk = req.body.project_id;
+        
         try{
-            let id = await adodb.saveData("m_leave_type","m_leave_type_id",req.body);
+            let id = await adodb.saveData("projects","project_id",req.body);
 
             let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
 
             let code = pk > 0 ? 200 : 201;
 
-            res.status(code).json({'m_leave_type_id': id, "msg": msg});
+            res.status(code).json({'project_id': id, "msg": msg});
         }
         catch(err){
             res.status(400).json({"msg":err});
@@ -94,4 +86,4 @@ const leaveController = {
     },
 }
 
-module.exports = leaveController;
+module.exports = projectController;
