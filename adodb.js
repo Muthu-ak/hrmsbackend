@@ -93,7 +93,7 @@ const adodb = {
       let id = data.hasOwnProperty(primary_key) ? data[primary_key] : -1;
       
       let is_record = await this.checkRecord(table_name, primary_key, id);
-      console.log(is_record);
+
       if (is_record > 0) {
         // Update query
         data["updated_on"] = current_date_time;

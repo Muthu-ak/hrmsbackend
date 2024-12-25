@@ -77,7 +77,6 @@ const masterController = {
         }
     },
     async clients(req, res){
-        console.log("ji");
         try {
             const data = await masterModel.clients();
             res.status(200).json(data);

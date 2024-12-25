@@ -47,7 +47,41 @@ const userController = {
       res.status(500).json({ error: 'Internal Server Error' });
 
     }
-  }
+  },
+
+  async saveEducation(req, res){
+
+    const {employee_education_id} = req.body;
+    
+    try {
+
+      const id = await adodb.saveData('employee_education', 'employee_education_id', req.body);
+
+      res.status(201).json({'msg':`${employee_education_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_education_id':id});
+
+    } catch (err) {
+      res.status(400).json({ error: 'Something went Wrong' });
+
+    }
+  },
+
+  async saveExperience(req, res){
+
+    const {employee_experience_id} = req.body;
+    
+    try {
+
+      const id = await adodb.saveData('employee_experience', 'employee_experience_id', req.body);
+
+      res.status(201).json({'msg':`${employee_experience_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_experience_id':id});
+
+    } catch (err) {
+      res.status(400).json({ error: 'Something went Wrong' });
+
+    }
+  },
+
+
 
 }
 
