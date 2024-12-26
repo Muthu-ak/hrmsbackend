@@ -10,8 +10,14 @@ const userController = {
     let params = req.query;
     let cal = (params.currentpage - 1) * params.postperpage;
     let offset = cal < 0 ? 0 : cal;
+
+    let orderBY = "ORDER BY e.created_on DESC";
+    if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
+      orderBY = `ORDER BY ${params.sorting["accessor"]} ${params.sorting["direction"]}`; 
+    }
+
     try {
-      const users = await userModel.getUserList(params.postperpage, offset);
+      const users = await userModel.getUserList(params.postperpage, offset, orderBY);
       res.status(200).json(users);
     } catch (err) {
       res.status(500).json({ error: 'Internal Server Error' });
@@ -68,15 +74,32 @@ const userController = {
   async saveExperience(req, res){
 
     const {employee_experience_id, employment_date} = req.body;
-
-    req.body['start_date'] = moment(employment_date[0]).format('YYYY-MM-DD');
-    req.body['end_date'] = moment(employment_date[1]).format('YYYY-MM-DD');
+    if(!req.body.hasOwnProperty('is_deleted')){
+      req.body['start_date'] = moment(employment_date[0]).format('YYYY-MM-DD');
+      req.body['end_date'] = moment(employment_date[1]).format('YYYY-MM-DD');
+    }
     
     try {
 
       const id = await adodb.saveData('employee_experience', 'employee_experience_id', req.body);
 
       res.status(201).json({'msg':`${employee_experience_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_experience_id':id});
+
+    } catch (err) {
+      res.status(400).json({ error: 'Something went Wrong' });
+
+    }
+  },
+
+  async saveBankDetails(req, res){
+
+    const {employee_bank_id} = req.body;
+    
+    try {
+
+      const id = await adodb.saveData('employee_bank', 'employee_bank_id', req.body);
+
+      res.status(201).json({'msg':`${employee_bank_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_bank_id':id});
 
     } catch (err) {
       res.status(400).json({ error: 'Something went Wrong' });
