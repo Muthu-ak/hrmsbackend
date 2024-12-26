@@ -67,7 +67,10 @@ const userController = {
 
   async saveExperience(req, res){
 
-    const {employee_experience_id} = req.body;
+    const {employee_experience_id, employment_date} = req.body;
+
+    req.body['start_date'] = moment(employment_date[0]).format('YYYY-MM-DD');
+    req.body['end_date'] = moment(employment_date[1]).format('YYYY-MM-DD');
     
     try {
 
@@ -81,7 +84,14 @@ const userController = {
     }
   },
 
-
+  async experience(req, res){
+    try {
+      const users = await userModel.experience(req.query.employee_id);
+      res.status(200).json(users);
+    } catch (err) {
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
 
 }
 

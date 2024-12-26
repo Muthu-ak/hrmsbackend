@@ -24,6 +24,15 @@ const userModel = {
     return {data:rows, totalRecord:count[0]['counts']};
   },
 
+  async experience(id) {
+    const [rows] = await db.query(`SELECT ROW_NUMBER() OVER(ORDER BY ee.end_date DESC) AS s_no, ee.employee_experience_id,
+    ee.previous_job_title,ee.previous_company_name,  ee.previous_job_location,
+    DATE_FORMAT(ee.start_date, "%d-%b-%Y") AS start_date, DATE_FORMAT(ee.end_date, "%d-%b-%Y") AS end_date 
+    FROM employee_experience ee 
+    WHERE ee.is_deleted = 0 AND ee.employee_id = ?`,[id]);
+    return rows;
+  },
+
 }
 
 // Export functions
