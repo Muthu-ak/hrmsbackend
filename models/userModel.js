@@ -3,7 +3,7 @@ const db = require('../config/db');
 
 const userModel = {
 
-  async getUserList(pagesize, offset, orderBY) {
+  async getUserList(pagesize, offset, orderBY, where) {
 
     let limit = `LIMIT ${pagesize} OFFSET ${offset}`;
 
@@ -12,7 +12,7 @@ const userModel = {
     INNER JOIN m_user_type mut ON mut.m_user_type_id = ul.m_user_type_id AND mut.is_deleted = 0
     LEFT JOIN m_departments md ON md.m_department_id = e.m_department_id AND md.is_deleted = 0
     LEFT JOIN m_designation mdn ON mdn.m_designation_id = e.m_designation_id AND mdn.is_deleted =0 
-    WHERE e.is_deleted = 0`);
+    WHERE e.is_deleted = 0 ${where}`);
 
     const [rows] = await db.query(`SELECT ROW_NUMBER() OVER(${orderBY}) AS s_no, e.employee_id, ul.user_login_id, ul.user_name, ul.email_id, mut.user_type,  
     e.phone_number, md.department_name, mdn.designation_name FROM employees e 
@@ -20,7 +20,7 @@ const userModel = {
     INNER JOIN m_user_type mut ON mut.m_user_type_id = ul.m_user_type_id AND mut.is_deleted = 0
     LEFT JOIN m_departments md ON md.m_department_id = e.m_department_id AND md.is_deleted = 0
     LEFT JOIN m_designation mdn ON mdn.m_designation_id = e.m_designation_id AND mdn.is_deleted =0 
-    WHERE e.is_deleted = 0 ${limit}`);
+    WHERE e.is_deleted = 0 ${where} ${limit}`);
     return {data:rows, totalRecord:count[0]['counts']};
   },
 

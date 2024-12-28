@@ -30,8 +30,10 @@ const announcementController = {
     },
     async saveNotice(req, res){
         let pk = req.body.notice_id;
-        req.body["start_date"] = moment(req.body.notice_date[0]).format("YYYY-MM-DD");
-        req.body["end_date"] = moment(req.body.notice_date[1]).format("YYYY-MM-DD");
+
+        if(!req.body.hasOwnProperty("is_deleted")){
+            req.body["issue_date"] = moment(req.body.issue_date).format("YYYY-MM-DD");
+        }
         
         try{
             let id = await adodb.saveData("notice","notice_id",req.body);
