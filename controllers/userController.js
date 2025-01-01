@@ -6,6 +6,7 @@ const moment = require("moment");
 const multer = require('multer');
 const path = require('path');
 const crypto = require("crypto");
+const fs = require('fs').promises;
 
 // Set up multer storage configuration
 const storage = multer.diskStorage({
@@ -46,19 +47,22 @@ const userController = {
     let offset = cal < 0 ? 0 : cal;
 
     let where = "";
-
-    for(let x in params.filter){
-      if(params.filter[x] != null){
-        if(x == 'm_user_type_id'){
-          where += ` AND ul.${x} = ${Number(params.filter[x])}`;
-
+    
+    if(params.hasOwnProperty('filter')){
+      for(let x in params.filter){
+        if(params.filter[x] != null){
+          if(x == 'm_user_type_id'){
+            where += ` AND ul.${x} = ${Number(params.filter[x])}`;
+  
+          }
+          else{
+            where += ` AND e.${x} = ${Number(params.filter[x])}`;
+          }
+          
         }
-        else{
-          where += ` AND e.${x} = ${Number(params.filter[x])}`;
-        }
-        
       }
     }
+
 
     let orderBY = "ORDER BY e.created_on DESC";
     if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
@@ -145,7 +149,7 @@ const userController = {
     const {employee_bank_id} = req.body;
     
     try {
-
+       console.log(req.body);
       const id = await adodb.saveData('employee_bank', 'employee_bank_id', req.body);
 
       res.status(201).json({'msg':`${employee_bank_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_bank_id':id});
@@ -165,17 +169,48 @@ const userController = {
     }
   },
 
+
   async saveDocument(req, res){
+
+    const {employee_document_id} = req.body;
+   
+    // Check if a file is uploaded
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+    else{
+      data['file_name'] = req.file.filename;
+    }
+    
     try {
-      // Check if a file is uploaded
-      if (!req.file) {
-        return res.status(400).json({ message: 'No file uploaded' });
+
+      if(employee_document_id > 0){
+        let response = await  userModel.documents(data.employee_id, employee_document_id);
+        let filePath = path.join(__dirname, 'upload', response[0]['file_name']);
+        await fs.unlink(filePath);
       }
-  
-      // File is uploaded successfully
-      res.status(200).json({ message: 'PDF uploaded successfully', file: req.file });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+    
+      const id = await adodb.saveData('employee_document', 'employee_document_id', req.body);
+
+      res.status(201).json({'msg':`${id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_bank_id':id});
+
+    } catch (err) {
+      res.status(400).json({ error: 'Something went Wrong' });
+    }
+  },
+
+  async saveSalary(req, res){
+
+    const {employee_salary_id} = req.body;
+    
+    try {
+      const id = await adodb.saveData('employee_salary', 'employee_salary_id', req.body);
+
+      res.status(201).json({'msg':`${employee_salary_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_salary_id':id});
+
+    } catch (err) {
+      res.status(400).json({ error: 'Something went Wrong' });
+
     }
   },
 

@@ -63,7 +63,11 @@ const masterModel = {
         return rows;
     },
     async userList(params){
-        let [rows] = await db.execute("SELECT CAST(ul.user_login_id AS CHAR) AS 'value' , ul.user_name AS 'label' FROM user_login ul WHERE ul.is_deleted = 0 AND ul.m_user_type_id = ?", [params.m_user_type_id]);
+         let where = "";
+         if(params.hasOwnProperty("m_user_type_id")){
+            where += ` AND ul.m_user_type_id IN (${params.m_user_type_id})`;
+         }
+        let [rows] = await db.execute(`SELECT CAST(ul.user_login_id AS CHAR) AS 'value' , ul.user_name AS 'label' FROM user_login ul WHERE ul.is_deleted = 0 AND ul.m_user_type_id <> 1000 ${where}`);
         return rows;
     },
 }

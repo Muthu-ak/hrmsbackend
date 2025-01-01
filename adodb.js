@@ -83,7 +83,7 @@ const adodb = {
   },
 
   saveData(table_name, primary_key, data) {
-    
+    console.log(typeof data);
     return new Promise(async (resolve, reject) =>{
 
     let query = {};

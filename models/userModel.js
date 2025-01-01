@@ -33,6 +33,18 @@ const userModel = {
     return rows;
   },
 
+  async documents(employee_id, employee_document_id = null) {
+    let where = ''; 
+
+    if(employee_document_id != null){
+      where = ` AND ed.employee_document_id = ${employee_document_id}`;
+    }
+
+    const [rows] = await db.query(`SELECT ROW_NUMBER() OVER(ORDER BY ed.created_on DESC) AS s_no, ed.employee_document_id, ed.employee_id, ed.document_id, ed.file_name 
+    FROM employee_document ed  WHERE ed.is_deleted = 0 AND ed.employee_id = ? ${where}`,[employee_id]);
+    return rows;
+  },
+
 }
 
 // Export functions
