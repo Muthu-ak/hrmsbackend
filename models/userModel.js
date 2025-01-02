@@ -24,24 +24,30 @@ const userModel = {
     return {data:rows, totalRecord:count[0]['counts']};
   },
 
-  async experience(id) {
+  async experience(user_login_id) {
     const [rows] = await db.query(`SELECT ROW_NUMBER() OVER(ORDER BY ee.end_date DESC) AS s_no, ee.employee_experience_id,
     ee.previous_job_title,ee.previous_company_name,  ee.previous_job_location,
     DATE_FORMAT(ee.start_date, "%d-%b-%Y") AS start_date, DATE_FORMAT(ee.end_date, "%d-%b-%Y") AS end_date 
     FROM employee_experience ee 
-    WHERE ee.is_deleted = 0 AND ee.employee_id = ?`,[id]);
+    WHERE ee.is_deleted = 0 AND ee.user_login_id = ?`,[user_login_id]);
     return rows;
   },
 
-  async documents(employee_id, employee_document_id = null) {
+  async documents(user_login_id, employee_document_id = null) {
     let where = ''; 
 
     if(employee_document_id != null){
       where = ` AND ed.employee_document_id = ${employee_document_id}`;
     }
 
-    const [rows] = await db.query(`SELECT ROW_NUMBER() OVER(ORDER BY ed.created_on DESC) AS s_no, ed.employee_document_id, ed.employee_id, ed.document_id, ed.file_name 
-    FROM employee_document ed  WHERE ed.is_deleted = 0 AND ed.employee_id = ? ${where}`,[employee_id]);
+    const [rows] = await db.query(`SELECT ROW_NUMBER() OVER(ORDER BY ed.created_on DESC) AS s_no, ed.employee_document_id, ed.user_login_id, ed.document_id, ed.file_name 
+    FROM employee_document ed  WHERE ed.is_deleted = 0 AND ed.user_login_id = ? ${where}`,[user_login_id]);
+    return rows;
+  },
+
+  async salary(user_login_id) {
+    const [rows] = await db.query(`SELECT es.employee_salary_id, es.user_login_id, es.basic_salary, es.house_rent_allowance, es.medical_allowance,
+    es.transport_allowance, es.other_allowance, es.tax, es.other_deduction FROM  employee_salary es WHERE es.is_deleted = 0 AND es.user_login_id = ?`,[user_login_id]);
     return rows;
   },
 

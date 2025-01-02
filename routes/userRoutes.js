@@ -13,5 +13,6 @@ router.post('/saveBankDetails', userController.saveBankDetails);
 router.get('/experience', userController.experience);
 router.post('/saveDocument',  upload.single('file'), userController.saveDocument);
 router.post('/saveSalary', userController.saveSalary);
+router.get('/salary', userController.salary);
 
 module.exports = router;

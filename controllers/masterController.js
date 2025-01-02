@@ -61,6 +61,35 @@ const masterController = {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
+    async userList(req, res){
+        try {
+            const data = await masterModel.userList(req.query);
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+    async reportingList(req, res){
+        let obj = {};
+        console.log(req.query.m_user_type_id, typeof req.query.m_user_type_id);
+        switch(req.query.m_user_type_id){
+            case '1':
+                obj["m_user_type_id"] = 20;
+                break;
+            case '20':
+                obj["m_user_type_id"] = 100;
+                break;
+            default:
+                obj["m_user_type_id"] = 1000;
+                break;
+        }
+        try {
+            const data = await masterModel.userList(obj);
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
     async employeeFormMasters(req, res){
         try {
             const gender = await masterModel.gender();
@@ -71,6 +100,7 @@ const masterController = {
             const banks = await masterModel.banks();
             const bankAccountType = await masterModel.bankAccountType();
             const documentNames = await masterModel.documentNames();
+
             res.status(200).json({gender, bloodGroup, userType, department, employeeStatus, banks, bankAccountType, documentNames});
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
@@ -84,14 +114,7 @@ const masterController = {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
-    async userList(req, res){
-        try {
-            const data = await masterModel.userList(req.query);
-            res.status(200).json(data);
-        } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-    },
+
 }
 
 module.exports = masterController;

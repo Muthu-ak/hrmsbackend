@@ -10,7 +10,7 @@ const masterModel = {
        return rows;
     },
     async userType(){
-       let [rows] = await db.execute("SELECT CAST(mut.m_user_type_id AS CHAR) AS 'value', mut.user_type AS label FROM m_user_type mut WHERE mut.is_deleted = 0 AND mut.m_user_type_id < 100");
+       let [rows] = await db.execute("SELECT CAST(mut.m_user_type_id AS CHAR) AS 'value', mut.user_type AS label FROM m_user_type mut WHERE mut.is_deleted = 0 AND mut.m_user_type_id <> 1000");
        return rows;
     },
     async department(){
@@ -65,9 +65,14 @@ const masterModel = {
     async userList(params){
          let where = "";
          if(params.hasOwnProperty("m_user_type_id")){
-            where += ` AND ul.m_user_type_id IN (${params.m_user_type_id})`;
+            where += ` AND ul.m_user_type_id IN (${params.m_user_type_id}) `;
          }
-        let [rows] = await db.execute(`SELECT CAST(ul.user_login_id AS CHAR) AS 'value' , ul.user_name AS 'label' FROM user_login ul WHERE ul.is_deleted = 0 AND ul.m_user_type_id <> 1000 ${where}`);
+         else{
+            where += `AND ul.m_user_type_id <> 1000`;
+         }
+         let sql = `SELECT CAST(ul.user_login_id AS CHAR) AS 'value' , ul.user_name AS 'label' FROM user_login ul WHERE ul.is_deleted = 0  ${where} ORDER BY ul.user_name`;
+
+        let [rows] = await db.execute(sql);
         return rows;
     },
 }

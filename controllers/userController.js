@@ -162,7 +162,16 @@ const userController = {
 
   async experience(req, res){
     try {
-      const users = await userModel.experience(req.query.employee_id);
+      const users = await userModel.experience(req.query.user_login_id);
+      res.status(200).json(users);
+    } catch (err) {
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
+
+  async salary(req, res){
+    try {
+      const users = await userModel.salary(req.query.user_login_id);
       res.status(200).json(users);
     } catch (err) {
       res.status(500).json({ error: 'Internal Server Error' });

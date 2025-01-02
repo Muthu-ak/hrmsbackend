@@ -13,6 +13,7 @@ router.get('/leaveType', masterController.leaveType);
 router.get('/employeeFormMasters', masterController.employeeFormMasters);
 router.get('/clients', masterController.clients);
 router.get('/userList', masterController.userList);
+router.get('/reportingList', masterController.reportingList);
 
 
 module.exports = router;

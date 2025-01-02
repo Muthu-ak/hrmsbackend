@@ -7,6 +7,7 @@ const payrollController = {
         let params = req.query;
         let cal = (params.currentpage - 1) * params.postperpage;
         let offset = cal < 0 ? 0 : cal;
+        let where = "";
 
         let orderBY = "ORDER BY pr.created_on DESC";
         if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
@@ -18,31 +19,48 @@ const payrollController = {
             }
         }
 
+        if (params.hasOwnProperty('filter')) {
+            for (let x in params.filter) {
+                if (params.filter[x] != null && x == "payroll_date") {
+                    where += ` AND pr.${x} = Date('${moment(params.filter[x]).format('YYYY-MM-DD')}')`;
+                }
+                else if (params.filter[x] != null) {
+                    where += ` AND pr.${x} = ${params.filter[x]}`;
+                }
+            }
+        }
+
         try {
-            const data = await payrollModel.payrollList(params.postperpage, offset, orderBY);
+            const data = await payrollModel.payrollList(params.postperpage, offset, orderBY, where);
             res.status(200).json(data);
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
-    async viewLeaveType(req, res){
+    async viewPayroll(req, res){
         try {
-            const data = await payrollModel.viewLeaveType(req.query);
+            const data = await payrollModel.viewPayroll(req.query);
             res.status(200).json(data);
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
-    async saveLeaveType(req, res){
-        let pk = req.body.m_leave_type_id;
+    async savePayroll(req, res){
+        let pk = req.body.payroll_id;
+
+        if(req.body.hasOwnProperty('payroll_date')){
+            req.body['payroll_date'] = moment(req.body['payroll_date']).format("YYYY-MM-DD");
+        }
+
         try{
-            let id = await adodb.saveData("m_leave_type","m_leave_type_id",req.body);
+        
+            let id = await adodb.saveData("payroll","payroll_id",req.body);
 
             let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
 
             let code = pk > 0 ? 200 : 201;
 
-            res.status(code).json({'m_leave_type_id': id, "msg": msg});
+            res.status(code).json({'payroll_id': id, "msg": msg});
         }
         catch(err){
             res.status(400).json({"msg":err});
