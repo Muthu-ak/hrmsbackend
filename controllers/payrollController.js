@@ -21,8 +21,8 @@ const payrollController = {
 
         if (params.hasOwnProperty('filter')) {
             for (let x in params.filter) {
-                if (params.filter[x] != null && x == "payroll_date") {
-                    where += ` AND pr.${x} = Date('${moment(params.filter[x]).format('YYYY-MM-DD')}')`;
+                if (params.filter[x] != null && x == "payroll_month") {
+                    where += ` AND DATE_FORMAT(pr.${x}, '%M-%Y') = DATE_FORMAT(Date('${moment(params.filter[x]).format('YYYY-MM-DD')}'), '%M-%Y')`;
                 }
                 else if (params.filter[x] != null) {
                     where += ` AND pr.${x} = ${params.filter[x]}`;
@@ -45,11 +45,19 @@ const payrollController = {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
+    async payslip(req, res){
+        try {
+            const data = await payrollModel.payslip(req.query);
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
     async savePayroll(req, res){
         let pk = req.body.payroll_id;
 
-        if(req.body.hasOwnProperty('payroll_date')){
-            req.body['payroll_date'] = moment(req.body['payroll_date']).format("YYYY-MM-DD");
+        if(req.body.hasOwnProperty('payroll_month')){
+            req.body['payroll_month'] = moment(req.body['payroll_month']).format("YYYY-MM-DD");
         }
 
         try{
