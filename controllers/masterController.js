@@ -71,7 +71,6 @@ const masterController = {
     },
     async reportingList(req, res){
         let obj = {};
-        console.log(req.query.m_user_type_id, typeof req.query.m_user_type_id);
         switch(req.query.m_user_type_id){
             case '1':
                 obj["m_user_type_id"] = 20;

@@ -149,7 +149,6 @@ const userController = {
     const {employee_bank_id} = req.body;
     
     try {
-       console.log(req.body);
       const id = await adodb.saveData('employee_bank', 'employee_bank_id', req.body);
 
       res.status(201).json({'msg':`${employee_bank_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_bank_id':id});
@@ -223,6 +222,25 @@ const userController = {
     }
   },
 
+  async profile(req, res){
+    try {
+      const basic = await userModel.basic(req.query.user_login_id);
+      const education = await userModel.education(req.query.user_login_id);
+      const experience = await userModel.experience(req.query.user_login_id);
+      const bank = await userModel.bank(req.query.user_login_id);
+      const salary = await userModel.salary(req.query.user_login_id);
+  
+      res.status(200).json({
+        basic:basic.length > 0 ? basic[0] : null, 
+        education:education.length > 0 ? education[0] : null, 
+        experience:experience.length > 0 ? experience : null, 
+        bank:bank.length > 0 ? bank[0] : null, 
+        salary:salary.length > 0 ? salary[0] : null, 
+      });
+    } catch (err) {
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
 }
 
 module.exports = {upload, userController};

@@ -7,7 +7,9 @@ const dashboardModel = {
         return rows;
     },
     async upcomingHolidays(){
-        let [rows] = await db.execute(`SELECT h.holiday_id, h.holiday_title, DATE_FORMAT(h.holiday_date, "%d-%b-%Y") AS holiday_date, DATE_FORMAT(h.holiday_date, "%W") AS holiday_day FROM holiday h WHERE h.is_deleted = 0 ORDER BY h.holiday_date ASC LIMIT 5`);
+        let [rows] = await db.execute(`SELECT h.holiday_id, h.holiday_title, DATE_FORMAT(h.holiday_date, "%d-%b-%Y") AS holiday_date, 
+        DATE_FORMAT(h.holiday_date, "%W") AS holiday_day FROM holiday h 
+        WHERE h.is_deleted = 0 AND h.holiday_date >= DATE(NOW()) ORDER BY h.holiday_date ASC`);
         return rows;
     },
     async todayBirthday(){
