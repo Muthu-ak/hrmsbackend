@@ -62,6 +62,10 @@ const masterModel = {
         let [rows] = await db.execute("SELECT CAST(c.client_id AS CHAR) AS 'value' , c.client_name AS 'label' FROM clients c WHERE c.is_deleted = 0");
         return rows;
     },
+    async projectStatus(){
+        let [rows] = await db.execute("SELECT CAST(ps.project_status_id AS CHAR) AS 'value' , ps.project_status AS 'label' FROM project_status ps WHERE ps.is_deleted = 0");
+        return rows;
+    },
     async userList(params){
          let where = "";
          if(params.hasOwnProperty("m_user_type_id")){
@@ -70,7 +74,14 @@ const masterModel = {
          else{
             where += `AND ul.m_user_type_id <> 1000`;
          }
-         let sql = `SELECT CAST(ul.user_login_id AS CHAR) AS 'value' , ul.user_name AS 'label' FROM user_login ul WHERE ul.is_deleted = 0  ${where} ORDER BY ul.user_name`;
+
+         if(params.hasOwnProperty("reporting_id")){
+            where += ` AND e.reporting_id IN (${params.reporting_id}) `;
+         }
+
+         let sql = `SELECT CAST(ul.user_login_id AS CHAR) AS 'value' , ul.user_name AS 'label' FROM user_login ul
+         INNER JOIN employees e on e.user_login_id = ul.user_login_id AND e.is_deleted = 0 
+         WHERE ul.is_deleted = 0  ${where} ORDER BY ul.user_name`;
 
         let [rows] = await db.execute(sql);
         return rows;

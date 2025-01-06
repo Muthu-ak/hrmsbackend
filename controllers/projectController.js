@@ -1,5 +1,6 @@
 const projectModel = require("../models/projectModel");
 const adodb = require('../adodb');
+const moment = require('moment');
 
 const projectController = {
     async clients(req, res){
@@ -68,9 +69,33 @@ const projectController = {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
+
+    async projectDetails(req, res){
+        try {
+            const basic = await projectModel.viewProject(req.query);
+            const teamMembers = await projectModel.teamMembers(req.query);
+
+            res.status(200).json({
+                basic:basic.length > 0 ? basic[0] : null,
+                teamMembers:teamMembers.length > 0 ? teamMembers : null,
+            });
+            
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+
     async saveProject(req, res){
         let pk = req.body.project_id;
-        
+
+        if(req.body.hasOwnProperty('start_date') && String(req.body['start_date']).length > 0){
+            req.body['start_date'] = moment(req.body['start_date']).format("YYYY-MM-DD");
+        }
+
+        if(req.body.hasOwnProperty('deadline') && String(req.body['deadline']).length > 0){
+            req.body['deadline'] = moment(req.body['deadline']).format("YYYY-MM-DD");
+        }
+
         try{
             let id = await adodb.saveData("projects","project_id",req.body);
 
@@ -79,6 +104,31 @@ const projectController = {
             let code = pk > 0 ? 200 : 201;
 
             res.status(code).json({'project_id': id, "msg": msg});
+        }
+        catch(err){
+            res.status(400).json({"msg":err});
+        }
+    },
+
+    async saveTeamMember(req, res){
+        let pk = req.body.project_member_id;
+
+        if(req.body.hasOwnProperty('start_date') && String(req.body['start_date']).length > 0){
+            req.body['start_date'] = moment(req.body['start_date']).format("YYYY-MM-DD");
+        }
+
+        if(req.body.hasOwnProperty('end_date') && String(req.body['end_date']).length > 0){
+            req.body['end_date'] = moment(req.body['end_date']).format("YYYY-MM-DD");
+        }
+
+        try{
+            let id = await adodb.saveData("project_members","project_member_id",req.body);
+
+            let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
+
+            let code = pk > 0 ? 200 : 201;
+
+            res.status(code).json({'project_member_id': id, "msg": msg});
         }
         catch(err){
             res.status(400).json({"msg":err});

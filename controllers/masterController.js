@@ -113,6 +113,14 @@ const masterController = {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
+    async projectStatus(req, res){
+        try {
+            const data = await masterModel.projectStatus();
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
 
 }
 
