@@ -41,7 +41,7 @@ const dashboardModel = {
         INNER JOIN m_departments md ON md.m_department_id = e.m_department_id AND md.is_deleted = 0
         INNER JOIN m_designation mdn ON mdn.m_designation_id = e.m_designation_id AND mdn.is_deleted = 0
         WHERE e.is_deleted = 0 AND e.m_employee_status_id = 1 
-        AND DATE_FORMAT(e.date_of_joining, "%d-%m") = DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 7 day), "%d-%m")
+        AND DATE_FORMAT(e.date_of_joining, "%d-%b") = DATE_FORMAT(NOW(), "%d-%b")
         AND YEAR(e.date_of_joining) <> YEAR(NOW())
         ORDER BY e.date_of_joining DESC`);
         return rows;
