@@ -3,7 +3,8 @@ const masterModel = require('../models/masterModel');
 const masterController = {
     async userType(req, res){
         try {
-            const data = await masterModel.userType();
+            let m_user_type_id = req.body.userDetails.m_user_type_id;
+            const data = await masterModel.userType(m_user_type_id);
             res.status(200).json(data);
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
@@ -63,7 +64,8 @@ const masterController = {
     },
     async userList(req, res){
         try {
-            const data = await masterModel.userList(req.query);
+            let m_user_type_id = req.body.userDetails.m_user_type_id;
+            const data = await masterModel.userList(req.query, m_user_type_id);
             res.status(200).json(data);
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
@@ -90,10 +92,11 @@ const masterController = {
         }
     },
     async employeeFormMasters(req, res){
+        let m_user_type_id = req.body.userDetails.m_user_type_id;
         try {
             const gender = await masterModel.gender();
             const bloodGroup = await masterModel.bloodGroup();
-            const userType = await masterModel.userType();
+            const userType = await masterModel.userType(m_user_type_id);
             const department = await masterModel.department();
             const employeeStatus = await masterModel.employeeStatus();
             const banks = await masterModel.banks();

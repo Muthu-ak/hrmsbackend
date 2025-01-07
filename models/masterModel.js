@@ -9,8 +9,9 @@ const masterModel = {
        let [rows] = await db.execute("SELECT CAST(mbg.m_blood_group_id AS CHAR) AS 'value', mbg.blood_group AS label FROM m_blood_group mbg WHERE mbg.is_deleted = 0");
        return rows;
     },
-    async userType(){
-       let [rows] = await db.execute("SELECT CAST(mut.m_user_type_id AS CHAR) AS 'value', mut.user_type AS label FROM m_user_type mut WHERE mut.is_deleted = 0 AND mut.m_user_type_id <> 1000");
+    async userType(m_user_type_id){
+       where = `AND mut.m_user_type_id  NOT IN (1000, ${m_user_type_id})`;
+       let [rows] = await db.execute(`SELECT CAST(mut.m_user_type_id AS CHAR) AS 'value', mut.user_type AS label FROM m_user_type mut WHERE mut.is_deleted = 0 ${where}`);
        return rows;
     },
     async department(){
@@ -66,13 +67,13 @@ const masterModel = {
         let [rows] = await db.execute("SELECT CAST(ps.project_status_id AS CHAR) AS 'value' , ps.project_status AS 'label' FROM project_status ps WHERE ps.is_deleted = 0");
         return rows;
     },
-    async userList(params){
+    async userList(params, m_user_type_id){
          let where = "";
          if(params.hasOwnProperty("m_user_type_id")){
             where += ` AND ul.m_user_type_id IN (${params.m_user_type_id}) `;
          }
          else{
-            where += `AND ul.m_user_type_id <> 1000`;
+            where += `AND ul.m_user_type_id  NOT IN (1000, ${m_user_type_id})`;
          }
 
          if(params.hasOwnProperty("reporting_id")){

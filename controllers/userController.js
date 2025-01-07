@@ -46,7 +46,9 @@ const userController = {
     let cal = (params.currentpage - 1) * params.postperpage;
     let offset = cal < 0 ? 0 : cal;
 
-    let where = "";
+    let m_user_type_id = req.body.userDetails.m_user_type_id;
+
+    let where = ` AND ul.m_user_type_id NOT IN (1000, ${m_user_type_id}) `;
     
     if(params.hasOwnProperty('filter')){
       for(let x in params.filter){

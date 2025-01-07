@@ -92,6 +92,68 @@ const leaveController = {
             res.status(400).json({"msg":err});
         }
     },
+
+    async leaveRequest(req, res){
+        let params = req.query;
+        let cal = (params.currentpage - 1) * params.postperpage;
+        let offset = cal < 0 ? 0 : cal;
+
+        let orderBY = "ORDER BY lr.m_leave_status_id, lr.created_on";
+
+        if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
+            if (params.sorting["accessor"] == "user_name") {
+                orderBY = `ORDER BY ul.user_name ${params.sorting["direction"]}`;
+            }
+            else if (params.sorting["accessor"] == "leave_type") {
+                orderBY = `ORDER BY mlt.leave_type ${params.sorting["direction"]}`;
+            }
+            else if (params.sorting["accessor"] == "leave_status") {
+                orderBY = `ORDER BY mls.leave_status ${params.sorting["direction"]}`;
+            }
+            else{
+                orderBY = `ORDER BY lr.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
+            }
+        }
+
+        try {
+            const data = await leaveModel.leaveRequest(params.postperpage, offset, orderBY);
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+    async viewLeaveRequest(req, res){
+        try {
+            const data = await leaveModel.viewLeaveRequest(req.query);
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+    async saveLeaveRequest(req, res){
+        let pk = req.body.leave_id;
+
+        if(req.body.hasOwnProperty('start_date')){
+            req.body['start_date'] = moment(req.body['start_date']).format("YYYY-MM-DD");
+        }
+
+        if(req.body.hasOwnProperty('end_date') && req.body?.end_date != null){
+            req.body['end_date'] = moment(req.body['end_date']).format("YYYY-MM-DD");
+        }
+
+        try{
+            let id = await adodb.saveData("leave_requests","leave_id",req.body);
+
+            let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
+
+            let code = pk > 0 ? 200 : 201;
+
+            res.status(code).json({'leave_id': id, "msg": msg});
+        }
+        catch(err){
+            res.status(400).json({"msg":err});
+        }
+    },
 }
 
 module.exports = leaveController;

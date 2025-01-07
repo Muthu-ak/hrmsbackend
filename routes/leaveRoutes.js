@@ -10,4 +10,8 @@ router.get('/leaveType', leaveController.leaveType);
 router.post('/saveLeaveType', leaveController.saveLeaveType);
 router.get('/viewLeaveType', leaveController.viewLeaveType);
 
+router.get('/leaveRequest', leaveController.leaveRequest);
+router.post('/saveLeaveRequest', leaveController.saveLeaveRequest);
+router.get('/viewLeaveRequest', leaveController.viewLeaveRequest);
+
 module.exports = router;
