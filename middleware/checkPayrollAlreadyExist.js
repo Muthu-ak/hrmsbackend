@@ -6,7 +6,7 @@ const checkPayrollAlreadyExist = async(req, res, next) =>{
     if(payroll_id  == -1){
         let x = moment(payroll_date).format("YYYY-MM-DD");
         let sql = `SELECT pr.payroll_id FROM payroll pr WHERE pr.is_deleted = 0 AND pr.user_login_id = ${user_login_id} 
-        AND DATE_FORMAT(pr.payroll_date, "%m-%Y") = DATE_FORMAT(DATE('${x}'), '%m-%Y')`;
+        AND DATE_FORMAT(pr.payroll_month, "%m-%Y") = DATE_FORMAT(DATE('${x}'), '%m-%Y')`;
    
         let [rows] = await db.execute(sql);
     

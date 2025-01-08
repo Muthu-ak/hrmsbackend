@@ -8,6 +8,17 @@ const payrollController = {
         let cal = (params.currentpage - 1) * params.postperpage;
         let offset = cal < 0 ? 0 : cal;
         let where = "";
+        
+      
+        const logger_type_id = req.body.userDetails.m_user_type_id;
+        const logger_id = req.body.userDetails.user_login_id;
+
+        if(logger_type_id < 100 && logger_id > 0){
+            where += ` AND ul.user_login_id = ${logger_id}`;
+        }
+        else if(logger_type_id == 100){
+            where += ` AND ul.m_user_type_id NOT IN (100)`;
+        }
 
         let orderBY = "ORDER BY pr.created_on DESC";
         if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){

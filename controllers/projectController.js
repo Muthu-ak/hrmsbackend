@@ -49,15 +49,27 @@ const projectController = {
         let cal = (params.currentpage - 1) * params.postperpage;
         let offset = cal < 0 ? 0 : cal;
 
+        let where = "";
+        const logger_type_id = req.body.userDetails.m_user_type_id;
+        const logger_id = req.body.userDetails.user_login_id;
+
+        if(logger_type_id == 20){
+            where += ` AND ul.user_login_id = ${logger_id}`;
+        }
+        else if(logger_type_id == 1){
+            where += ` AND pm.user_login_id = ${logger_id}`;
+        }
+
         let orderBY = "ORDER BY pt.created_on DESC";
         if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
             orderBY = `ORDER BY pt.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
         }
 
         try {
-            const data = await projectModel.projects(params.postperpage, offset, orderBY);
+            const data = await projectModel.projects(params.postperpage, offset, orderBY, where);
             res.status(200).json(data);
         } catch (err) {
+            console.log(err);
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },

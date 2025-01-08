@@ -100,6 +100,15 @@ const leaveController = {
 
         let orderBY = "ORDER BY lr.m_leave_status_id, lr.created_on";
 
+        let where = ``;
+
+        const logger_type_id = req.body.userDetails.m_user_type_id;
+        const logger_id = req.body.userDetails.user_login_id;
+
+        if(logger_type_id == 1){
+            where += ` AND ul.user_login_id = ${logger_id}`;
+        }
+
         if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
             if (params.sorting["accessor"] == "user_name") {
                 orderBY = `ORDER BY ul.user_name ${params.sorting["direction"]}`;
@@ -116,7 +125,7 @@ const leaveController = {
         }
 
         try {
-            const data = await leaveModel.leaveRequest(params.postperpage, offset, orderBY);
+            const data = await leaveModel.leaveRequest(params.postperpage, offset, orderBY, where);
             res.status(200).json(data);
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });

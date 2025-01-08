@@ -17,19 +17,20 @@ const projectModel = {
 
         return rows;
     },
-    async projects(pagesize, offset, orderBY){
+    async projects(pagesize, offset, orderBY, where){
         let limit = `LIMIT ${pagesize} OFFSET ${offset}`;
 
-        let [count] = await db.execute(`SELECT COUNT(pt.project_id) AS counts FROM projects pt WHERE pt.is_deleted = 0`);
+        let joins = ` INNER JOIN clients c ON c.client_id = pt.client_id AND c.is_deleted = 0
+        INNER JOIN user_login ul ON ul.user_login_id = pt.project_manager_id AND ul.is_deleted = 0
+        LEFT JOIN project_status ps ON ps.project_status_id = pt.project_status_id AND ps.is_deleted = 0 
+        LEFT JOIN project_members pm ON pm.project_id = pt.project_id AND pm.is_deleted = 0 `;
+
+        let [count] = await db.execute(`SELECT COUNT(pt.project_id) AS counts FROM projects pt ${joins} WHERE pt.is_deleted = 0 ${where} GROUP BY pt.project_id`);
         let sql = `SELECT ROW_NUMBER() OVER(${orderBY}) as s_no, pt.project_id, pt.project_name, pt.project_description, c.client_name, ul.user_name AS project_manager,
         DATE_FORMAT(pt.start_date, "%d-%b-%Y") AS start_date, DATE_FORMAT(pt.deadline, "%d-%b-%Y") AS deadline, 
         pt.project_value, pt.project_status_id, ps.project_status, ps.status_color
-        FROM projects pt
-        INNER JOIN clients c ON c.client_id = pt.client_id AND c.is_deleted = 0
-        LEFT JOIN user_login ul ON ul.user_login_id = pt.project_manager_id AND ul.is_deleted = 0
-        LEFT JOIN project_status ps ON ps.project_status_id = pt.project_status_id AND ps.is_deleted = 0
-        WHERE pt.is_deleted = 0 ${limit}`;
-
+        FROM projects pt ${joins} WHERE pt.is_deleted = 0 ${where} GROUP BY pt.project_id ${limit}`;
+       
         let [rows] = await db.execute(sql);
   
         return {data:rows, totalRecord:count[0]['counts']};
