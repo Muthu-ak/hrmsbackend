@@ -93,6 +93,35 @@ const leaveController = {
         }
     },
 
+    async myleaves(req, res){
+        let params = req.query;
+        let cal = (params.currentpage - 1) * params.postperpage;
+        let offset = cal < 0 ? 0 : cal;
+
+        const logger_id = req.body.userDetails.user_login_id;
+
+        let orderBY = "ORDER BY lr.m_leave_status_id, lr.created_on";
+
+        let where = ` AND ul.user_login_id = ${logger_id}`;
+
+        if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
+            if (params.sorting["accessor"] == "leave_type") {
+                orderBY = `ORDER BY mlt.leave_type ${params.sorting["direction"]}`;
+            }
+            else if (params.sorting["accessor"] == "leave_status") {
+                orderBY = `ORDER BY mls.leave_status ${params.sorting["direction"]}`;
+            }
+            else{
+                orderBY = `ORDER BY lr.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
+            }
+        }
+        try {
+            const data = await leaveModel.leaveRequest(params.postperpage, offset, orderBY, where);
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
     async leaveRequest(req, res){
         let params = req.query;
         let cal = (params.currentpage - 1) * params.postperpage;
@@ -133,8 +162,10 @@ const leaveController = {
     },
     async viewLeaveRequest(req, res){
         try {
-            const data = await leaveModel.viewLeaveRequest(req.query);
-            res.status(200).json(data);
+            const basic = await leaveModel.viewLeaveRequest(req.query);
+            res.status(200).json({
+                'basic' : basic.length > 0 ? basic[0] : null
+            });
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
         }
@@ -149,6 +180,8 @@ const leaveController = {
         if(req.body.hasOwnProperty('end_date') && req.body?.end_date != null){
             req.body['end_date'] = moment(req.body['end_date']).format("YYYY-MM-DD");
         }
+
+        //  no.of days calculation
 
         try{
             let id = await adodb.saveData("leave_requests","leave_id",req.body);
