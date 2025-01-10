@@ -181,6 +181,9 @@ const leaveController = {
             req.body['end_date'] = moment(req.body['end_date']).format("YYYY-MM-DD");
         }
 
+        // Calculation for no.of days
+        
+
         try{
             let id = await adodb.saveData("leave_requests","leave_id",req.body);
 
