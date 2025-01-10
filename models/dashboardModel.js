@@ -46,17 +46,22 @@ const dashboardModel = {
         ORDER BY e.date_of_joining DESC`);
         return rows;
     },
-    async hrCards(){
-        let [rows] = await db.execute(`SELECT COUNT(e.employee_id) AS overall_employees,
-        (SELECT COUNT(CASE WHEN ul.m_user_type_id = 20 THEN ul.user_login_id END) AS counts FROM user_login ul 
-        WHERE ul.is_deleted = 0) AS total_managers,
-        (SELECT COUNT(CASE WHEN ul.m_user_type_id = 1 THEN ul.user_login_id END) AS counts FROM user_login ul 
-        WHERE ul.is_deleted = 0) AS total_employees,
-        (SELECT COUNT(c.client_id) AS counts FROM clients c WHERE c.is_deleted = 0) AS total_clients,
-        (SELECT COUNT(pt.project_id) AS counts FROM projects pt WHERE pt.is_deleted = 0) AS total_projects
-        FROM employees e WHERE e.is_deleted = 0`);
-        return rows;
+    async adminCard(){
+        let [rows] = await db.execute(`SELECT JSON_ARRAY( 
+            JSON_OBJECT('title', 'Total Employees', 'count', COUNT(ul.user_login_id), 'icon', 'FaUsers', 'id', 'total_employee'),
+            JSON_OBJECT('title', 'Human Resources', 'count', COUNT(CASE WHEN ul.m_user_type_id = 100 THEN ul.user_login_id END), 'icon', 'FaUserTie', 'id', 'hr_count'),
+            JSON_OBJECT('title', 'Managers', 'count', COUNT(CASE WHEN ul.m_user_type_id = 20 THEN ul.user_login_id END), 'icon', 'FaUserTie', 'id', 'manager_count'),
+            JSON_OBJECT('title', 'Employees', 'count', COUNT(CASE WHEN ul.m_user_type_id = 1 THEN ul.user_login_id END), 'icon', 'FaUser', 'id', 'employee_count'),
+            JSON_OBJECT('title', 'Clients', 'count', (SELECT COUNT(c.client_id) FROM clients c WHERE c.is_deleted = 0), 'icon', 'FaHandshake', 'id', 'client_count'),
+            JSON_OBJECT('title', 'Projects', 'count', (SELECT COUNT(p.project_id) FROM projects p INNER JOIN clients c ON c.client_id = p.client_id AND c.is_deleted = 0 WHERE p.is_deleted = 0), 'icon', 'FaClipboardList', 'id', 'project_count'),
+            JSON_OBJECT('title', 'Pending Leave Requests', 'count', (SELECT COUNT(CASE WHEN ul2.m_user_type_id = 100 THEN lr.leave_id END) FROM leave_requests lr INNER JOIN user_login ul2 ON ul2.user_login_id = lr.user_login_id AND ul2.is_deleted = 0 WHERE lr.is_deleted = 0 AND lr.m_leave_status_id = 1 ), 'icon', 'FaCalendarCheck', 'id', 'pending_leave_request_count')
+        ) AS counts
+        FROM user_login ul 
+        WHERE ul.is_deleted = 0 AND ul.m_user_type_id NOT IN (1000);`);
+        return rows[0]['counts'];
     },
+
+
 }
 
 module.exports = dashboardModel;
