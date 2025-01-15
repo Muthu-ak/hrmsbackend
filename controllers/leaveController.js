@@ -170,6 +170,7 @@ const leaveController = {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
+
     async saveLeaveRequest(req, res){
         let pk = req.body.leave_id;
 
