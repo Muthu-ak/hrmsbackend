@@ -10,9 +10,12 @@ router.get('/employeeStatus', masterController.employeeStatus);
 router.get('/attendanceStatus', masterController.attendanceStatus);
 router.get('/leaveStatus', masterController.leaveStatus);
 router.get('/leaveType', masterController.leaveType);
+router.get('/leaveYear', masterController.leaveYear);
+
 router.get('/employeeFormMasters', masterController.employeeFormMasters);
 
 router.get('/clients', masterController.clients);
+router.get('/projects', masterController.projects);
 router.get('/projectStatus', masterController.projectStatus);
 
 router.get('/userList', masterController.userList);

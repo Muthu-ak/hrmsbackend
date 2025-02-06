@@ -38,7 +38,6 @@ const upload = multer({
 });
 
 
-
 const userController = {
 
   async getUserList(req, res){
@@ -46,7 +45,7 @@ const userController = {
     let cal = (params.currentpage - 1) * params.postperpage;
     let offset = cal < 0 ? 0 : cal;
 
-    let m_user_type_id = req.body.userDetails.m_user_type_id;
+    let m_user_type_id = req.user.m_user_type_id;
 
     let where = ` AND ul.m_user_type_id NOT IN (1000, ${m_user_type_id}) `;
     
@@ -96,9 +95,9 @@ const userController = {
     try {
 
       await db.query('BEGIN');
-      const id = await adodb.saveData('user_login', 'user_login_id', req.body);
+      const id = await adodb.saveData('user_login', 'user_login_id', req.body, req.user);
       req.body['user_login_id'] = id;
-      const employee_id = await adodb.saveData('employees', 'employee_id', req.body);
+      const employee_id = await adodb.saveData('employees', 'employee_id', req.body, req.user);
       await db.query('COMMIT');
       res.status(201).json({'msg':`${user_login_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'user_login_id':id, 'employee_id':employee_id });
 
@@ -116,7 +115,7 @@ const userController = {
     
     try {
 
-      const id = await adodb.saveData('employee_education', 'employee_education_id', req.body);
+      const id = await adodb.saveData('employee_education', 'employee_education_id', req.body, req.user);
 
       res.status(201).json({'msg':`${employee_education_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_education_id':id});
 
@@ -136,7 +135,7 @@ const userController = {
     
     try {
 
-      const id = await adodb.saveData('employee_experience', 'employee_experience_id', req.body);
+      const id = await adodb.saveData('employee_experience', 'employee_experience_id', req.body, req.user);
 
       res.status(201).json({'msg':`${employee_experience_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_experience_id':id});
 
@@ -151,7 +150,7 @@ const userController = {
     const {employee_bank_id} = req.body;
     
     try {
-      const id = await adodb.saveData('employee_bank', 'employee_bank_id', req.body);
+      const id = await adodb.saveData('employee_bank', 'employee_bank_id', req.body, req.user);
 
       res.status(201).json({'msg':`${employee_bank_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_bank_id':id});
 
@@ -179,19 +178,30 @@ const userController = {
     }
   },
 
-
   async saveDocument(req, res){
 
     const {employee_document_id} = req.body;
-   
-    // Check if a file is uploaded
+    console.log(req);
+    try{
+      await upload.single('file') (req, res, (err) => {
+        if (err) {
+            return res.status(500).send({ error: err.message });
+        }
+      
+        console.log('File Upload Successful:', req.file);
+        // res.send('success');
+      });
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+    
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
     else{
-      data['file_name'] = req.file.filename;
+      req.body['file_name'] = req.file.filename;
     }
-    
+ 
     try {
 
       if(employee_document_id > 0){
@@ -200,11 +210,12 @@ const userController = {
         await fs.unlink(filePath);
       }
     
-      const id = await adodb.saveData('employee_document', 'employee_document_id', req.body);
+      const id = await adodb.saveData('employee_document', 'employee_document_id', req.body, req.user);
 
       res.status(201).json({'msg':`${id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_bank_id':id});
 
     } catch (err) {
+      console.log(err);
       res.status(400).json({ error: 'Something went Wrong' });
     }
   },
@@ -214,7 +225,7 @@ const userController = {
     const {employee_salary_id} = req.body;
     
     try {
-      const id = await adodb.saveData('employee_salary', 'employee_salary_id', req.body);
+      const id = await adodb.saveData('employee_salary', 'employee_salary_id', req.body, req.user);
 
       res.status(201).json({'msg':`${employee_salary_id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_salary_id':id});
 

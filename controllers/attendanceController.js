@@ -1,4 +1,5 @@
 const attendanceModel = require("../models/attendanceModel");
+const db = require("../config/db");
 const adodb = require('../adodb');
 const moment = require("moment");
 
@@ -58,8 +59,14 @@ const attendanceController = {
             req.body["attendance_date"] = moment(req.body.attendance_date).format("YYYY-MM-DD");
         }
 
+        if(!req.body.hasOwnProperty("m_attendance_status_id") && req.body.attendance_id == -1){
+            const sql = `SELECT (CASE WHEN TIME('${req.body.punch_in}') > c.start_time THEN 2 ELSE 1 END) AS m_attendance_status_id FROM company c WHERE c.is_deleted = 0`;
+            let [row] = await db.execute(sql);
+            req.body['m_attendance_status_id'] = row[0]['m_attendance_status_id'];
+        }
+       
         try {
-            let id = await adodb.saveData("attendance", "attendance_id", req.body);
+            let id = await adodb.saveData("attendance", "attendance_id", req.body, req.user);
 
             let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
 
@@ -69,6 +76,67 @@ const attendanceController = {
         }
         catch (err) {
             res.status(400).json({ "msg": err });
+        }
+    },
+
+    async attendanceReport(req, res, next){
+        let params = req.query;
+
+        let _obj = {
+            isExcel : params.hasOwnProperty('excel') ? true : false,
+            where:"",
+            limit:"",
+            joinWhere:"",
+            daysQuery:""
+        };
+
+        if(!_obj.isExcel){
+
+            let cal = (params.currentpage - 1) * params.postperpage;
+            let offset = cal < 0 ? 0 : cal;
+
+            _obj["limit"] = `LIMIT ${params.postperpage} OFFSET ${offset}`;
+        }
+
+        if(params.filter?.['user_login_id'] != null){
+            _obj['where'] = ` AND ul.user_login_id IN (${params.filter['user_login_id']})`;
+        }
+
+        const start_date = moment(params.filter['attendance_date']).startOf('month').format("YYYY-MM-DD");
+        const end_date = moment(params.filter['attendance_date']).endOf('month').format("YYYY-MM-DD");
+        
+        _obj['joinWhere'] = ` AND a.attendance_date BETWEEN '${start_date}' AND '${end_date}' `;
+
+        _obj["orderBY"] = "ORDER BY ul.user_name";
+
+        if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
+            _obj["orderBY"] = `ORDER BY ul.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
+        }
+
+        let final_date = new Date(end_date).getDate();
+        let header = [];
+        for(let i=1; i <= final_date; i++){
+            let comma = (i != final_date) ? ',' : "";
+            _obj["daysQuery"] += ` MAX(CASE WHEN DAY(a.attendance_date) = ${i} THEN a.m_attendance_status_id END) AS day_${i} ${comma} `;
+
+            header.push({
+                'Header':`${i}`,
+                'accessor':`day_${i}`
+            });
+        }
+
+        try {
+            const data = await attendanceModel.attendanceReport(_obj);
+            if(_obj.isExcel){
+                req.excelData = data;
+                next();
+            }
+            else{
+                data['header'] = header;
+                res.status(200).json(data);
+            }
+        } catch (err) {
+            res.status(500).json({ error: err.message});
         }
     },
 }

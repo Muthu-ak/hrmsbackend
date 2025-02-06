@@ -40,7 +40,7 @@ const adodb = {
           columnHolder.push(key);
 
           if (typeof value === 'string') {
-            valueHolder.push(`${value.replace(/'/g, "\\'")}`);
+            valueHolder.push(`${value.replace(/'/g, "\'").trim()}`);
           } else {
             valueHolder.push(value);
           }
@@ -67,7 +67,7 @@ const adodb = {
         if (columns.includes(key)) { 
           columnHolder.push(` ${key} = ? `);
           if (typeof value === 'string') {
-            valueHolder.push(`${value.replace(/'/g, "\\'")}`);
+            valueHolder.push(`${value.replace(/'/g, "\'").trim()}`);
           } else {
             valueHolder.push(value);
           }
@@ -82,7 +82,7 @@ const adodb = {
     }
   },
 
-  saveData(table_name, primary_key, data) {
+  saveData(table_name, primary_key, data, user) {
     return new Promise(async (resolve, reject) =>{
 
     let query = {};
@@ -96,16 +96,16 @@ const adodb = {
       if (is_record > 0) {
         // Update query
         data["updated_on"] = current_date_time;
-        data["updated_by"] = data.userDetails.user_login_id;
+        data["updated_by"] = user.user_login_id;
         query = await this.updateSql(table_name, primary_key ,data);
        
       } else {
         //  Insert query
        delete data[primary_key];
-       data['created_by'] = data.userDetails.user_login_id;
+       data['created_by'] = user.user_login_id;
        query = await this.insertSql(table_name, data);
       }
-      
+ 
       if(query.hasOwnProperty('sql')){
         const [result] = await db.query(query.sql, query.valueHolder);
        

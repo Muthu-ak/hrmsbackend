@@ -36,7 +36,7 @@ const announcementController = {
         }
         
         try{
-            let id = await adodb.saveData("notice","notice_id",req.body);
+            let id = await adodb.saveData("notice","notice_id",req.body, req.user);
 
             let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
 

@@ -10,6 +10,7 @@ dotenv.config({path:path.join(__dirname, 'config', 'config.env')});
 
 // Middleware
 app.use(cors());
+
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
@@ -25,6 +26,7 @@ const projectRoutes = require("./routes/projectRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const payrollRoutes = require("./routes/payrollRoutes");
+const excelRoutes = require("./routes/excelRoutes");
 
 // Routes Setup
 app.use('/auth', authRoutes);
@@ -37,7 +39,7 @@ app.use('/project', authMiddleware, projectRoutes);
 app.use('/dashboard', authMiddleware, dashboardRoutes);
 app.use('/attendance', authMiddleware, attendanceRoutes);
 app.use('/payroll', authMiddleware, payrollRoutes);
-
+app.use('/excel', authMiddleware, excelRoutes);
 
 app.listen(process.env.PORT, (err)=>{
     if(err) throw err;

@@ -7,7 +7,7 @@ const authMiddleware = async(req, res, next) =>{
         let token = authorization.split(" ")[1];
         jwt.verify(token, process.env.JWT_TOKEN_SECRET, (err, decode)=>{
             if(err) return res.status(403).json({'msg':'Token Expired'});
-            req.body.userDetails = decode;
+            req.user = decode;
             next();
         });
     }

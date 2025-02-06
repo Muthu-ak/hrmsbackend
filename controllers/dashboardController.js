@@ -1,5 +1,4 @@
 const dashboardModel = require("../models/dashboardModel");
-
 const dashboardController = {
     async getAll(req, res){
         try {
@@ -17,6 +16,18 @@ const dashboardController = {
                 newHires:newHires, 
                 workAnniversary:workAnniversary, 
                 adminCard:adminCard
+            });
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+    async attendance(req, res){
+        try {
+            const logger_user_login_id = req.user.user_login_id;
+            const attendance = await dashboardModel.attendance(logger_user_login_id);
+        
+            res.status(200).json({
+                attendance:attendance.length > 0 ? attendance[0] : null, 
             });
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });

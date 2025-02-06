@@ -3,7 +3,7 @@ const masterModel = require('../models/masterModel');
 const masterController = {
     async userType(req, res){
         try {
-            let m_user_type_id = req.body.userDetails.m_user_type_id;
+            let m_user_type_id = req.user.m_user_type_id;
             const data = await masterModel.userType(m_user_type_id);
             res.status(200).json(data);
         } catch (err) {
@@ -62,9 +62,17 @@ const masterController = {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
+    async leaveYear(req, res){
+        try {
+            const data = await masterModel.leaveYear();
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
     async userList(req, res){
         try {
-            let m_user_type_id = req.body.userDetails.m_user_type_id;
+            let m_user_type_id = req.user.m_user_type_id;
             const data = await masterModel.userList(req.query, m_user_type_id);
             res.status(200).json(data);
         } catch (err) {
@@ -92,7 +100,7 @@ const masterController = {
         }
     },
     async employeeFormMasters(req, res){
-        let m_user_type_id = req.body.userDetails.m_user_type_id;
+        let m_user_type_id = req.user.m_user_type_id;
         try {
             const gender = await masterModel.gender();
             const bloodGroup = await masterModel.bloodGroup();
@@ -112,6 +120,35 @@ const masterController = {
         try {
             const data = await masterModel.clients();
             res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+    async projects(req, res){
+        let where = "";
+        let m_user_type_id = req.user.m_user_type_id;
+        let user_login_id = req.user.user_login_id;
+
+        if(m_user_type_id == 20){
+            where = ` AND project_manager_id = ${user_login_id}`;
+        }
+
+        try {
+            const data = await masterModel.projects(where);
+            let selected_id = null;
+            if(req.query.project_id == null){
+                selected_id = data[0]['value'];
+                data[0] = {...data[0], selected:true};
+            }
+            else{
+                data.forEach((item, index)=>{
+                    if(req.query.project_id == item.value){
+                        selected_id = data[index]['project_id'];
+                        data[index] = {...data[index], selected:true};
+                    }
+                });
+            }
+            res.status(200).json({data, selected_id});
         } catch (err) {
             res.status(500).json({ error: 'Internal Server Error' });
         }

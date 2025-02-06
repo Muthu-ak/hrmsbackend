@@ -59,8 +59,18 @@ const masterModel = {
         let [rows] = await db.execute("SELECT CAST(mlt.m_leave_type_id AS CHAR) AS 'value', mlt.leave_type AS label FROM m_leave_type mlt WHERE mlt.is_deleted = 0");
         return rows;
     },
+    async leaveYear(){
+      let [rows] = await db.execute(`SELECT CAST(YEAR(h.holiday_date) AS CHAR) AS 'value', 
+          CAST(YEAR(h.holiday_date) AS CHAR) AS label, IF(YEAR(h.holiday_date) = YEAR(NOW()), true, false) AS selected
+          FROM holiday h WHERE h.is_deleted = 0 GROUP BY YEAR(h.holiday_date)`);
+      return rows;
+    },
     async clients(){
         let [rows] = await db.execute("SELECT CAST(c.client_id AS CHAR) AS 'value' , c.client_name AS 'label' FROM clients c WHERE c.is_deleted = 0");
+        return rows;
+    },
+    async projects(where){
+        let [rows] = await db.execute(`SELECT CAST(p.project_id AS CHAR) AS 'value' , p.project_name AS 'label' FROM projects p WHERE p.is_deleted = 0 ${where} `);
         return rows;
     },
     async projectStatus(){

@@ -10,8 +10,8 @@ const payrollController = {
         let where = "";
         
       
-        const logger_type_id = req.body.userDetails.m_user_type_id;
-        const logger_id = req.body.userDetails.user_login_id;
+        const logger_type_id = req.user.m_user_type_id;
+        const logger_id = req.user.user_login_id;
 
         if(logger_type_id < 100 && logger_id > 0){
             where += ` AND ul.user_login_id = ${logger_id}`;
@@ -73,7 +73,7 @@ const payrollController = {
 
         try{
         
-            let id = await adodb.saveData("payroll","payroll_id",req.body);
+            let id = await adodb.saveData("payroll","payroll_id",req.body, req.user);
 
             let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
 

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zapsoftek Employee mail</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th colspan="2">Employee Leave Reviewed</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Name</th><td><%= user_name %></td>
+            </tr>
+            <tr>
+                <th>Date</th><td><%= start_date %> <%if (start_date != end_date) end_date %> </td>
+            </tr>
+            <tr>
+                <th>Status</th><td><%= leave_status %></td>
+            </tr>
+            <tr>
+                <th>Remarks</th><td><%= remarks %></td>
+            </tr>
+            <tr>
+                <th>Reviewed by</th><td><%= updated_by %></td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>
