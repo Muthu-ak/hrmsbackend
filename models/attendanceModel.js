@@ -23,8 +23,8 @@ const attendanceModel = {
     async viewAttendance(params){
 
         let [rows] = await db.execute(`SELECT att.attendance_id, att.user_login_id, 
-        DATE_FORMAT(att.punch_in, '%h:%i') AS punch_in, 
-        DATE_FORMAT(att.punch_out, '%h:%i') AS punch_out, 
+        DATE_FORMAT(att.punch_in, '%H:%i') AS punch_in, 
+        DATE_FORMAT(att.punch_out, '%H:%i') AS punch_out, 
         DATE_FORMAT(att.attendance_date, "%d-%b-%Y") AS attendance_date, 
         att.m_attendance_status_id FROM attendance att
         INNER JOIN user_login ul ON ul.user_login_id = att.user_login_id AND ul.is_deleted = 0

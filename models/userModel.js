@@ -1,5 +1,7 @@
 
 const db = require('../config/db');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const userModel = {
 
@@ -82,15 +84,23 @@ const userModel = {
     return rows;
   },
 
-  async documents(user_login_id, employee_document_id = null) {
+  async documents(_obj) {
     let where = ''; 
 
-    if(employee_document_id != null){
-      where = ` AND ed.employee_document_id = ${employee_document_id}`;
+    if(_obj.hasOwnProperty("employee_document_id")){
+      where += ` AND ed.employee_document_id = ${_obj.employee_document_id}`;
     }
 
-    const [rows] = await db.query(`SELECT ROW_NUMBER() OVER(ORDER BY ed.created_on DESC) AS s_no, ed.employee_document_id, ed.user_login_id, ed.document_id, ed.file_name 
-    FROM employee_document ed  WHERE ed.is_deleted = 0 AND ed.user_login_id = ? ${where}`,[user_login_id]);
+    if(_obj.hasOwnProperty("user_login_id")){
+      where += ` AND ed.user_login_id = ${_obj.user_login_id}`;
+    }
+
+    let sql = `SELECT ROW_NUMBER() OVER(ORDER BY ed.created_on DESC) AS s_no, ed.employee_document_id, ed.user_login_id, ed.document_id, 
+    (CASE WHEN ed.document_id = 1 THEN 'Aadhaar Card' WHEN ed.document_id =2 THEN 'Pan Card' ELSE 'Passport' END) AS document_name,  
+    CONCAT('${process.env.BASE_DIR}','uploads/', ed.file_name) AS file_path, ed.file_name
+    FROM employee_document ed  WHERE ed.is_deleted = 0 ${where}`;
+
+    const [rows] = await db.query(sql);
     return rows;
   },
 

@@ -2,10 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const dotenv = require("dotenv");
-const path = require("path");
 const bodyParser = require("body-parser");
 
-dotenv.config({path:path.join(__dirname, 'config', 'config.env')});
+dotenv.config();
 
 
 // Middleware
@@ -26,6 +25,7 @@ const projectRoutes = require("./routes/projectRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const payrollRoutes = require("./routes/payrollRoutes");
+const perfomanceRoutes = require("./routes/perfomanceRoutes");
 const excelRoutes = require("./routes/excelRoutes");
 
 // Routes Setup
@@ -39,6 +39,7 @@ app.use('/project', authMiddleware, projectRoutes);
 app.use('/dashboard', authMiddleware, dashboardRoutes);
 app.use('/attendance', authMiddleware, attendanceRoutes);
 app.use('/payroll', authMiddleware, payrollRoutes);
+app.use('/performance', authMiddleware, perfomanceRoutes);
 app.use('/excel', authMiddleware, excelRoutes);
 
 app.listen(process.env.PORT, (err)=>{

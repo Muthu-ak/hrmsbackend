@@ -178,39 +178,42 @@ const userController = {
     }
   },
 
+  async documents(req, res){
+    try {
+      const users = await userModel.documents({user_login_id:req.query.user_login_id});
+      res.status(200).json(users);
+    } catch (err) {
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
+
   async saveDocument(req, res){
 
     const {employee_document_id} = req.body;
-    console.log(req);
-    try{
-      await upload.single('file') (req, res, (err) => {
-        if (err) {
-            return res.status(500).send({ error: err.message });
-        }
-      
-        console.log('File Upload Successful:', req.file);
-        // res.send('success');
-      });
-    } catch (error) {
-      res.status(500).send({ error: error.message });
+
+    let _data = {};
+
+    for(let key in req.body){
+      _data[key] = req.body[key];
     }
     
-    if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+    if(!_data.hasOwnProperty('is_deleted')){
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+      else{
+        _data['file_name'] = req.file.filename;
+      }
     }
-    else{
-      req.body['file_name'] = req.file.filename;
-    }
- 
+
     try {
 
       if(employee_document_id > 0){
-        let response = await  userModel.documents(data.employee_id, employee_document_id);
-        let filePath = path.join(__dirname, 'upload', response[0]['file_name']);
-        await fs.unlink(filePath);
+        let response = await userModel.documents({employee_document_id});
+        await fs.unlink('uploads/'+response[0].file_name);
       }
     
-      const id = await adodb.saveData('employee_document', 'employee_document_id', req.body, req.user);
+      const id = await adodb.saveData('employee_document', 'employee_document_id', _data, req.user);
 
       res.status(201).json({'msg':`${id > 0 ? "Updated Successfully" : "Saved Successfully"}`, 'employee_bank_id':id});
 
@@ -231,7 +234,6 @@ const userController = {
 
     } catch (err) {
       res.status(400).json({ error: 'Something went Wrong' });
-
     }
   },
 
@@ -242,15 +244,19 @@ const userController = {
       const experience = await userModel.experience(req.query.user_login_id);
       const bank = await userModel.bank(req.query.user_login_id);
       const salary = await userModel.salary(req.query.user_login_id);
-  
+      
+      const documents = await userModel.documents({user_login_id:req.query.user_login_id});
+
       res.status(200).json({
         basic:basic.length > 0 ? basic[0] : null, 
         education:education.length > 0 ? education[0] : null, 
         experience:experience.length > 0 ? experience : null, 
         bank:bank.length > 0 ? bank[0] : null, 
         salary:salary.length > 0 ? salary[0] : null, 
+        documents:documents.length > 0 ? documents : null, 
       });
     } catch (err) {
+      console.log(err);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   },

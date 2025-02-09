@@ -1,6 +1,6 @@
 
 const express = require('express');
-const {userController} = require('../controllers/userController');
+const {upload, userController} = require('../controllers/userController');
 const router = express.Router();
 
 
@@ -11,7 +11,8 @@ router.post('/saveEducation', userController.saveEducation);
 router.post('/saveExperience', userController.saveExperience);
 router.post('/saveBankDetails', userController.saveBankDetails);
 router.get('/experience', userController.experience);
-router.post('/saveDocument', userController.saveDocument);
+router.get('/documents', userController.documents);
+router.post('/saveDocument', upload.single('file'), userController.saveDocument);
 router.post('/saveSalary', userController.saveSalary);
 router.get('/salary', userController.salary);
 router.get('/profile', userController.profile);
