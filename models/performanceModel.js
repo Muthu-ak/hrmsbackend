@@ -26,6 +26,45 @@ const performanceModel = {
 
         return _result;
     },
+    async competency({isExcel, limit, orderBY , where}){
+        let _result = {};
+
+        let excel_not_include_fields = "";
+
+        if(!isExcel){
+            excel_not_include_fields = `com.compentency_id, `;
+            let [count] = await db.execute(`SELECT COUNT(com.compentency_id) AS counts FROM compentency com WHERE com.is_deleted = 0 ${where}`);
+            _result['totalRecord'] = count[0]['counts'];
+        }
+
+        let sql = `SELECT ROW_NUMBER() OVER(${orderBY}) as s_no,  ${excel_not_include_fields} 
+        com.compentency_name, com.weightage FROM compentency com WHERE com.is_deleted = 0  ${where} ${limit}`;
+    
+        let [rows] = await db.execute(sql);
+
+        _result['data'] = rows;
+
+        return _result;
+    },
+    async goal({limit, orderBY , where}){
+        let _result = {};
+        let join = `LEFT JOIN m_priority mp ON mp.m_priority_id = gl.m_priority_id AND mp.is_deleted = 0`;
+        
+        let [count] = await db.execute(`SELECT COUNT(gl.goal_id) AS counts FROM goal gl WHERE gl.is_deleted = 0 ${join} ${where}`);
+        _result['totalRecord'] = count[0]['counts'];
+
+        let sql = `SELECT ROW_NUMBER() OVER(${orderBY}) as s_no, gl.goal_id, gl.user_login_id, gl.goal_name, 
+        DATE_FORMAT(gl.start_date, '%d-%b-%Y') AS start_date,  
+        DATE_FORMAT(gl.end_date, '%d-%b-%Y') AS end_date, gl.m_priority_id, mp.priority_name, gl.description, gl.weightage, gl.progress, 
+        (CASE WHEN gl.progress = 0 THEN 'Yet to Start' WHEN gl.progress = 100 THEN 'Completed' ELSE 'Inprogess' END) AS goal_status 
+        FROM goal gl ${join} WHERE gl.is_deleted = 0 ${where} ${limit}`;
+    
+        let [rows] = await db.execute(sql);
+
+        _result['data'] = rows;
+
+        return _result;
+    },
 }
 
 module.exports = performanceModel;
