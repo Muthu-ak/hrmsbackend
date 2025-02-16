@@ -97,6 +97,11 @@ const masterModel = {
         let [rows] = await db.execute(sql);
         return rows;
     },
+
+   async appraisalCycle(){
+      let [rows] = await db.execute("SELECT CAST(ac.appraisal_cycle_id AS CHAR) AS 'value' , ac.appraisal_name AS 'label', ac.is_active FROM appraisal_cycle ac WHERE ac.is_deleted = 0");
+      return rows;
+   },
 }
 
 module.exports = masterModel;

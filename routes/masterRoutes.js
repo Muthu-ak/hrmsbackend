@@ -21,5 +21,7 @@ router.get('/projectStatus', masterController.projectStatus);
 router.get('/userList', masterController.userList);
 router.get('/reportingList', masterController.reportingList);
 
+router.get('/appraisalCycle', masterController.appraisalCycle);
+
 
 module.exports = router;

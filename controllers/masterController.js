@@ -161,6 +161,27 @@ const masterController = {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
+    async appraisalCycle(req, res){
+        try {
+            const result = await masterModel.appraisalCycle();
+            let data = [], selected_id = null;
+            result.forEach((item, index)=>{
+                data[index] = {
+                    'label':item.label,
+                    'value':item.value
+                }
+                if(!req.query.hasOwnProperty('appraisal_cycle_id') && item.is_active == 1){
+                    selected_id = Number(item.value);
+                }
+                else if(req.query.appraisal_cycle_id == item.value){
+                    selected_id = Number(item.value);
+                }
+            });
+            res.status(200).json({data, selected_id});
+        } catch (err) {
+            res.status(500).json({ error: err.message()});
+        }
+    },
 
 }
 
