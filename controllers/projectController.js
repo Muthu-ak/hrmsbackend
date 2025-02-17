@@ -195,6 +195,147 @@ const projectController = {
             res.status(400).json({"msg":err});
         }
     },
+
+    async tasks(req, res, next){
+        let params = req.query;
+
+        let _obj = {
+            isExcel : params.hasOwnProperty('excel') ? true : false,
+            where:"",
+            limit:""
+        };
+
+        if (params.hasOwnProperty('filter')) {
+            for (let x in params.filter) {
+                if (params.filter[x] != null) {
+                    _obj["where"] += ` AND ${x} = ${params.filter[x]}`;
+                }
+            }
+        }
+
+        if(!_obj.isExcel){
+
+            let cal = (params.currentpage - 1) * params.postperpage;
+            let offset = cal < 0 ? 0 : cal;
+
+            _obj["limit"] = `LIMIT ${params.postperpage} OFFSET ${offset}`;
+        }
+
+        _obj["orderBY"] = "ORDER BY ts.created_on DESC";
+
+        if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
+            _obj["orderBY"] = `ORDER BY ${params.sorting["accessor"]} ${params.sorting["direction"]}`;
+        }
+
+        try {
+            const data = await projectModel.tasks(_obj);
+            if(_obj.isExcel){
+                req.excelData = data;
+                next();
+            }
+            else{
+                res.status(200).json(data);
+            }
+        } catch (err) {
+            res.status(500).json({ error: err.message});
+        }
+    },
+
+    async saveTask(req, res){
+        let pk = req.body.task_id;
+
+        try{
+
+            if(req.body.hasOwnProperty('task_date') && req.body['task_date'].length > 1){
+                req.body['start_date'] = moment(req.body['task_date'][0]).format("YYYY-MM-DD");
+                req.body['end_date'] = moment(req.body['task_date'][1]).format("YYYY-MM-DD");
+            }
+
+            let id = await adodb.saveData("tasks","task_id",req.body, req.user);
+
+            let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
+
+            let code = pk > 0 ? 200 : 201;
+
+            res.status(code).json({'task_id': id, "msg": msg});
+        }
+        catch(err){
+            res.status(400).json({"msg":err});
+        }
+    },
+
+    async timesheets(req, res, next){
+        let params = req.query;
+
+        let _obj = {
+            isExcel : params.hasOwnProperty('excel') ? true : false,
+            where:"",
+            limit:""
+        };
+
+        if (params.hasOwnProperty('filter')) {
+            for (let x in params.filter) {
+                if (params.filter[x] != null) {
+                    _obj["where"] += ` AND ${x} = ${params.filter[x]}`;
+                }
+            }
+        }
+
+        if(!_obj.isExcel){
+
+            let cal = (params.currentpage - 1) * params.postperpage;
+            let offset = cal < 0 ? 0 : cal;
+
+            _obj["limit"] = `LIMIT ${params.postperpage} OFFSET ${offset}`;
+        }
+
+        _obj["orderBY"] = "ORDER BY tm.created_on DESC";
+
+        if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
+            _obj["orderBY"] = `ORDER BY ${params.sorting["accessor"]} ${params.sorting["direction"]}`;
+        }
+
+        try {
+            const data = await projectModel.timesheets(_obj);
+            if(_obj.isExcel){
+                req.excelData = data;
+                next();
+            }
+            else{
+                res.status(200).json(data);
+            }
+        } catch (err) {
+            res.status(500).json({ error: err.message});
+        }
+    },
+
+    async saveTimesheets(req, res){
+        let pk = req.body.timesheet_id;
+
+        try{
+
+            if(req.body.hasOwnProperty('start_date_time') && req.body['start_date_time'].length > 0){
+                req.body['start_date_time'] = moment(req.body['start_date_time']).format("YYYY-MM-DD HH:mm:ss");
+            }
+
+            if(req.body.hasOwnProperty('end_date_time') && req.body['end_date_time'].length > 0){
+                req.body['end_date_time'] = moment(req.body['end_date_time']).format("YYYY-MM-DD HH:mm:ss");
+            }
+
+            let id = await adodb.saveData("timesheets","timesheet_id",req.body, req.user);
+
+            let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
+
+            let code = pk > 0 ? 200 : 201;
+
+            res.status(code).json({'timesheet_id': id, "msg": msg});
+        }
+        catch(err){
+            res.status(400).json({"msg":err});
+        }
+    },
+
+
 }
 
 module.exports = projectController;

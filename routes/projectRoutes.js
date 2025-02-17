@@ -15,4 +15,10 @@ router.get('/projectDetails', projectController.projectDetails);
 router.post('/saveTeamMember', projectController.saveTeamMember);
 router.get('/teamMembers', projectController.teamMembers);
 
+router.get('/tasks', projectController.tasks);
+router.post('/saveTask', projectController.saveTask);
+
+router.get('/timesheets', projectController.timesheets);
+router.post('/saveTimesheets', projectController.saveTimesheets);
+
 module.exports = router;
