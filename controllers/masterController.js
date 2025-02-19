@@ -7,7 +7,7 @@ const masterController = {
             const data = await masterModel.userType(m_user_type_id);
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async department(req, res){
@@ -15,7 +15,7 @@ const masterController = {
             const data = await masterModel.department();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async designation(req, res){
@@ -27,7 +27,7 @@ const masterController = {
             const data = await masterModel.designation(m_department_id);
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async employeeStatus(req, res){
@@ -35,7 +35,7 @@ const masterController = {
             const data = await masterModel.employeeStatus();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async attendanceStatus(req, res){
@@ -43,7 +43,7 @@ const masterController = {
             const data = await masterModel.attendanceStatus();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async leaveStatus(req, res){
@@ -51,7 +51,7 @@ const masterController = {
             const data = await masterModel.leaveStatus();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async leaveType(req, res){
@@ -59,7 +59,7 @@ const masterController = {
             const data = await masterModel.leaveType();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async leaveYear(req, res){
@@ -67,7 +67,7 @@ const masterController = {
             const data = await masterModel.leaveYear();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async userList(req, res){
@@ -76,7 +76,7 @@ const masterController = {
             const data = await masterModel.userList(req.query, m_user_type_id);
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async reportingList(req, res){
@@ -96,7 +96,15 @@ const masterController = {
             const data = await masterModel.userList(obj);
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
+        }
+    },
+    async employeeList(req, res){
+        try {
+            const data = await masterModel.employeeList(req);
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ "msg":err.message });
         }
     },
     async employeeFormMasters(req, res){
@@ -113,7 +121,7 @@ const masterController = {
 
             res.status(200).json({gender, bloodGroup, userType, department, employeeStatus, banks, bankAccountType, documentNames});
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async clients(req, res){
@@ -121,7 +129,7 @@ const masterController = {
             const data = await masterModel.clients();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async projects(req, res){
@@ -150,7 +158,7 @@ const masterController = {
             }
             res.status(200).json({data, selected_id});
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async projectStatus(req, res){
@@ -158,7 +166,7 @@ const masterController = {
             const data = await masterModel.projectStatus();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ "msg":err });
         }
     },
     async appraisalCycle(req, res){
@@ -179,7 +187,29 @@ const masterController = {
             });
             res.status(200).json({data, selected_id});
         } catch (err) {
-            res.status(500).json({ error: err.message()});
+            res.status(500).json({ "msg":err});
+        }
+    },
+    async tasks(req, res){
+        try {
+            const data = await masterModel.tasks(req.query.project_id);
+            if(data.length > 0){
+                data.unshift({'label':'All Tasks', "value":"-1"});
+            }
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ "msg":err.message});
+        }
+    },
+    async teamMembers(req, res){
+        try {
+            const data = await masterModel.teamMembers(req.query.project_id);
+            if(data.length > 0){
+                data.unshift({'label':'All Members', "value":"-1"});
+            }
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ "msg":err});
         }
     },
 

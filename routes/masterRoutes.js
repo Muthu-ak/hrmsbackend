@@ -20,8 +20,12 @@ router.get('/projectStatus', masterController.projectStatus);
 
 router.get('/userList', masterController.userList);
 router.get('/reportingList', masterController.reportingList);
+router.get('/employeeList', masterController.employeeList);
 
 router.get('/appraisalCycle', masterController.appraisalCycle);
+
+router.get('/tasks', masterController.tasks);
+router.get('/teamMembers', masterController.teamMembers);
 
 
 module.exports = router;

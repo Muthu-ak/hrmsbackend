@@ -1,4 +1,5 @@
 const express = require('express');
+const createTaskDuration = require('../middleware/TimesheetMiddleware')
 const projectController = require('../controllers/projectController');
 const router = express.Router();
 
@@ -19,6 +20,6 @@ router.get('/tasks', projectController.tasks);
 router.post('/saveTask', projectController.saveTask);
 
 router.get('/timesheets', projectController.timesheets);
-router.post('/saveTimesheets', projectController.saveTimesheets);
+router.post('/saveTimesheets', createTaskDuration,  projectController.saveTimesheets);
 
 module.exports = router;

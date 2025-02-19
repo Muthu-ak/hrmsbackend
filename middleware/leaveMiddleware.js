@@ -115,7 +115,7 @@ const checkLeaveBalance = async(req, res, next) =>{
                     no_of_days = rows[0]['no_of_days'];
                 }
                 else{
-                    return res.status(400).json({'msg':'Something went wrong caculate no of days leave'});
+                    return res.status(400).json({'msg':'Something went wrong calculate no of days leave'});
                 }
             });
 

@@ -36,7 +36,7 @@ const projectController = {
                 res.status(200).json(data);
             }
         } catch (err) {
-            res.status(500).json({ error: err.message});
+            res.status(500).json({ "msg": err});
         }
     },
     async viewClient(req, res){
@@ -208,7 +208,7 @@ const projectController = {
         if (params.hasOwnProperty('filter')) {
             for (let x in params.filter) {
                 if (params.filter[x] != null) {
-                    _obj["where"] += ` AND ${x} = ${params.filter[x]}`;
+                    _obj["where"] += ` AND ts.${x} = ${params.filter[x]}`;
                 }
             }
         }
@@ -224,7 +224,10 @@ const projectController = {
         _obj["orderBY"] = "ORDER BY ts.created_on DESC";
 
         if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
-            _obj["orderBY"] = `ORDER BY ${params.sorting["accessor"]} ${params.sorting["direction"]}`;
+
+            let table_short_name = params.sorting["accessor"] == "project_status" ? 'ps' : 'ts';
+
+            _obj["orderBY"] = `ORDER BY ${table_short_name}.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
         }
 
         try {
@@ -246,9 +249,12 @@ const projectController = {
 
         try{
 
-            if(req.body.hasOwnProperty('task_date') && req.body['task_date'].length > 1){
-                req.body['start_date'] = moment(req.body['task_date'][0]).format("YYYY-MM-DD");
-                req.body['end_date'] = moment(req.body['task_date'][1]).format("YYYY-MM-DD");
+            if(req.body.hasOwnProperty('start_date')){
+                req.body['start_date'] = moment(req.body['start_date']).format("YYYY-MM-DD");
+            }
+
+            if(req.body.hasOwnProperty('end_date')){
+                req.body['end_date'] = moment(req.body['end_date']).format("YYYY-MM-DD");
             }
 
             let id = await adodb.saveData("tasks","task_id",req.body, req.user);
@@ -275,8 +281,8 @@ const projectController = {
 
         if (params.hasOwnProperty('filter')) {
             for (let x in params.filter) {
-                if (params.filter[x] != null) {
-                    _obj["where"] += ` AND ${x} = ${params.filter[x]}`;
+                if (params.filter[x] != null && params.filter[x] != -1) {
+                    _obj["where"] += ` AND tm.${x} = ${params.filter[x]}`;
                 }
             }
         }
@@ -292,7 +298,7 @@ const projectController = {
         _obj["orderBY"] = "ORDER BY tm.created_on DESC";
 
         if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
-            _obj["orderBY"] = `ORDER BY ${params.sorting["accessor"]} ${params.sorting["direction"]}`;
+            _obj["orderBY"] = `ORDER BY tm.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
         }
 
         try {
@@ -305,7 +311,7 @@ const projectController = {
                 res.status(200).json(data);
             }
         } catch (err) {
-            res.status(500).json({ error: err.message});
+            res.status(500).json({ "msg": err});
         }
     },
 

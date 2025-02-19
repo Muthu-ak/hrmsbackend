@@ -242,7 +242,7 @@ const leaveController = {
               let subject = (pk > 0) ? `${basic[0]['leave_status']} leave request` : `${basic[0]['leave_type']} leave request`;
               
 
-              let isEmailed = await emailTransport('muthuak457@gmail.com', subject, template, basic[0]);
+              let isEmailed = await emailTransport('mgrvijay97@gmail.com', subject, template, basic[0]);
 
               if(isEmailed){
                 await db.query('COMMIT');

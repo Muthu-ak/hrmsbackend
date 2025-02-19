@@ -79,6 +79,7 @@ const masterModel = {
     },
     async userList(params, m_user_type_id){
          let where = "";
+
          if(params.hasOwnProperty("m_user_type_id")){
             where += ` AND ul.m_user_type_id IN (${params.m_user_type_id}) `;
          }
@@ -97,9 +98,45 @@ const masterModel = {
         let [rows] = await db.execute(sql);
         return rows;
     },
+    async employeeList(req){
 
+      const user_login_id = req.user.user_login_id;
+
+      let where = "";
+
+      if(req.query.hasOwnProperty('appraisal_cycle_id')){
+         where = ` AND ut.value NOT IN (SELECT al.user_login_id FROM appraisee_list al WHERE al.is_deleted = 0 AND al.appraisal_cycle_id = ${req.query.appraisal_cycle_id})`;
+      }
+
+      const sql = `WITH RECURSIVE user_table AS (
+         SELECT CAST(ul.user_login_id AS CHAR) AS 'value' , ul.user_name AS 'label' FROM user_login ul
+         LEFT JOIN employees e on e.user_login_id = ul.user_login_id AND e.is_deleted = 0 
+         WHERE ul.is_deleted = 0 AND ul.user_login_id = ${user_login_id}
+         UNION ALL
+         SELECT CAST(ul.user_login_id AS CHAR) AS 'value' , ul.user_name AS 'label' FROM user_login ul
+         LEFT JOIN employees e on e.user_login_id = ul.user_login_id AND e.is_deleted = 0 
+         INNER JOIN user_table ut ON ut.value = e.reporting_id 
+         WHERE ul.is_deleted = 0 
+      ) SELECT * FROM user_table ut
+       WHERE ut.value <> ${user_login_id} ${where} ORDER BY ut.label`;
+
+      let [rows] = await db.execute(sql);
+
+      return rows;
+
+    },
    async appraisalCycle(){
       let [rows] = await db.execute("SELECT CAST(ac.appraisal_cycle_id AS CHAR) AS 'value' , ac.appraisal_name AS 'label', ac.is_active FROM appraisal_cycle ac WHERE ac.is_deleted = 0");
+      return rows;
+   },
+   async tasks(project_id){
+      let [rows] = await db.execute("SELECT CAST(ts.task_id AS CHAR) AS 'value' , ts.task_name AS 'label' FROM tasks ts WHERE ts.is_deleted = 0 AND ts.task_status_id <> 4 AND ts.project_id = ?", [project_id]);
+      return rows;
+   },
+   async teamMembers(project_id){
+      let [rows] = await db.execute(`SELECT CAST(pm.project_member_id AS CHAR) AS 'value' , ul.user_name AS 'label' FROM project_members pm
+      INNER JOIN user_login ul ON ul.user_login_id = pm.user_login_id AND ul.is_deleted = 0
+      WHERE pm.is_deleted = 0 AND pm.project_id = ? `, [project_id]);
       return rows;
    },
 }

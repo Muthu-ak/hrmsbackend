@@ -72,10 +72,16 @@ const projectModel = {
         const joins = `INNER JOIN user_login ul ON ul.user_login_id = pm.user_login_id AND ul.is_deleted = 0
         INNER JOIN employees e ON e.user_login_id = pm.user_login_id AND e.is_deleted = 0`;
 
-        let [count] = await db.execute(`SELECT COUNT(pm.project_member_id) AS counts FROM project_members pm ${joins} WHERE pm.is_deleted = 0 ${where}`);
+        let [count] = await db.execute(`SELECT COUNT(pm.project_member_id) AS counts FROM project_members pm ${joins} WHERE pm.is_deleted = 0 ${where} GROUP BY pm.project_member_id `);
 
-        let [rows] = await db.execute(`SELECT ROW_NUMBER() OVER(${orderBY}) as s_no, pm.project_member_id, pm.project_id, pm.user_login_id, ul.user_name, ul.email_id, e.phone_number,  pm.role 
-        FROM project_members pm ${joins} WHERE pm.is_deleted = 0 ${where} ${orderBY} ${limit}`);
+        const sql = `SELECT ROW_NUMBER() OVER(${orderBY}) as s_no, pm.project_member_id, pm.project_id, pm.user_login_id, 
+        ul.user_name, ul.email_id, e.phone_number,  pm.role , COUNT(tm.timesheet_id) AS timesheet_entries,
+        SEC_TO_TIME(SUM(TIME_TO_SEC(tm.task_duration))) AS timesheet_hours
+        FROM project_members pm ${joins} 
+        LEFT JOIN timesheets tm ON tm.project_id = pm.project_id AND tm.project_member_id = pm.project_member_id AND tm.is_deleted = 0
+        WHERE pm.is_deleted = 0 ${where} GROUP BY pm.project_member_id  ${orderBY} ${limit}`;
+
+        let [rows] = await db.execute(sql);
 
         return {data:rows, totalRecord:count[0]['counts']};
     },
@@ -84,18 +90,20 @@ const projectModel = {
 
         let excel_not_include_fields = "";
 
+        let joins = ` LEFT JOIN project_status ps ON ps.project_status_id = ts.task_status_id AND ps.is_deleted = 0
+        LEFT JOIN timesheets tm ON tm.task_id = ts.task_id AND tm.is_deleted = 0`;
+
         if(!isExcel){
             excel_not_include_fields = "ts.task_id, ts.project_id, ts.task_status_id,";
-            let [count] = await db.execute(`SELECT COUNT(ts.task_id) AS counts FROM tasks ts WHERE ts.is_deleted = 0 ${where}`);
+            let [count] = await db.execute(`SELECT COUNT(ts.task_id) AS counts FROM tasks ts ${joins} WHERE ts.is_deleted = 0 ${where}`);
             _result['totalRecord'] = count[0]['counts'];
         }
 
         let sql = `SELECT ROW_NUMBER() OVER(${orderBY}) as s_no, ${excel_not_include_fields} ts.task_name, ts.task_description, 
         DATE_FORMAT(ts.start_date, '%d-%b-%Y') AS start_date, DATE_FORMAT(ts.end_date, '%d-%b-%Y') AS end_date,
-        ts.projected_hours,  ps.project_status as task_status, ps.status_color  FROM tasks ts 
-        LEFT JOIN project_status ps ON ps.project_status_id = ts.task_status_id AND ps.is_deleted = 0
-        WHERE ts.is_deleted = 0 ${where} ${limit}`;
-        
+        ts.projected_hours,  ps.project_status, ps.status_color, SEC_TO_TIME(SUM(TIME_TO_SEC(tm.task_duration))) AS task_duration FROM tasks ts 
+        ${joins} WHERE ts.is_deleted = 0  ${where} GROUP BY ts.task_id ${limit}`;
+
         let [rows] = await db.execute(sql);
 
         _result['data'] = rows;
@@ -120,10 +128,14 @@ const projectModel = {
         }
 
         let sql = `SELECT ROW_NUMBER() OVER(${orderBY}) as s_no, ${excel_not_include_fields} ts.task_name, ul.user_name,  mdn.designation_name, 
-        DATE_FORMAT(tm.start_date_time, '%d-%b-%Y %r') AS start_date_time, 
-        DATE_FORMAT(tm.end_date_time, '%d-%b-%Y %r') AS end_date_time, tm.comments FROM timesheets tm
+        DATE_FORMAT(tm.start_date_time, '%d-%b-%Y %k:%i') as start_date_time,
+        DATE_FORMAT(tm.end_date_time, '%d-%b-%Y %k:%i') as end_date_time,
+        DATE_FORMAT(tm.start_date_time, '%d-%b-%Y %l:%i %p') AS display_start_date_time, 
+        DATE_FORMAT(tm.end_date_time, '%d-%b-%Y %l:%i %p') AS display_end_date_time,
+        tm.comments, tm.task_duration 
+        FROM timesheets tm
         ${join} WHERE tm.is_deleted = 0 ${where} ${limit}`;
-        
+
         let [rows] = await db.execute(sql);
 
         _result['data'] = rows;

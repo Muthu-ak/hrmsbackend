@@ -1,6 +1,7 @@
 const performanceModel = require("../models/performanceModel");
 const adodb = require('../adodb');
 const moment = require('moment');
+const db = require('../config/db');
 
 const performanceController = {
     async appraisalCycleList(req, res, next){
@@ -48,6 +49,12 @@ const performanceController = {
         }
         
         try{
+
+            if(req.body.hasOwnProperty('is_active')){
+                let sql = `UPDATE appraisal_cycle ac SET ac.is_active = 0 WHERE ac.is_deleted = 0 AND ac.appraisal_cycle_id != ${pk} `;
+                await db.execute(sql);
+            }
+
             let id = await adodb.saveData("appraisal_cycle","appraisal_cycle_id", req.body, req.user);
 
             let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
@@ -138,6 +145,14 @@ const performanceController = {
             res.status(500).json({ error: err.message});
         }
     },
+    async questions(req, res){
+        try {
+            const data = await performanceModel.questions();
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: err.message});
+        }
+    },
     async saveGoal(req, res){
         let pk = req.body.goal_id;
 
@@ -157,6 +172,81 @@ const performanceController = {
         }
         catch(err){
             res.status(400).json({"msg":err});
+        }
+    },
+    async saveSelfAppraisal(req, res){
+
+        const {responses, user_login_id} = req.body;
+       
+        try{
+            for(let i = 0; i < responses.length; i++){
+
+                responses[i]['user_login_id'] = user_login_id;
+
+                await adodb.saveData("self_appraisal","self_appraisal_id", responses[i], req.user);
+            }
+
+            res.status(200).json({"msg": "Successfully Submitted"});
+        }
+        catch(err){
+            res.status(400).json({"msg":err.message});
+        }
+
+    },
+    async appraiseelist(req, res, next){
+        let params = req.query;
+
+        let _obj = {
+            isExcel : params.hasOwnProperty('excel') ? true : false,
+            where:"",
+            limit:""
+        };
+
+        if (params.hasOwnProperty('appraisal_cycle_id')) {
+            _obj["where"] += ` AND al.appraisal_cycle_id = ${params.appraisal_cycle_id}`;
+        }
+
+        if(!_obj.isExcel){
+
+            let cal = (params.currentpage - 1) * params.postperpage;
+            let offset = cal < 0 ? 0 : cal;
+
+            _obj["limit"] = `LIMIT ${params.postperpage} OFFSET ${offset}`;
+        }
+
+        _obj["orderBY"] = "ORDER BY al.created_on DESC";
+
+        if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
+            _obj["orderBY"] = `ORDER BY al.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
+        }
+
+        try {
+            const data = await performanceModel.appraiseelist(_obj);
+            if(_obj.isExcel){
+                req.excelData = data;
+                next();
+            }
+            else{
+                res.status(200).json(data);
+            }
+        } catch (err) {
+            res.status(500).json({ error: err.message});
+        }
+    },
+    async saveAppraiseelist(req, res){
+        let pk = req.body.appraisee_id;
+        
+        try{
+            let id = await adodb.saveData("appraisee_list","appraisee_id", req.body, req.user);
+
+            let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
+
+            let code = pk > 0 ? 200 : 201;
+
+            res.status(code).json({'appraisee_id': id, "msg": msg});
+        }
+        catch(err){
+            res.status(400).json({"msg":err.message});
         }
     },
 }
