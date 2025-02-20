@@ -106,6 +106,31 @@ const performanceModel = {
 
         return _result;
     },
+    async viewAppraisee(req){
+
+        const {appraisal_cycle_id, user_login_id} = req.query;
+
+        const sql = `SELECT al.appraisee_id, al.appraisal_cycle_id, al.user_login_id, al.overall_score, al.status_id,
+        e.emp_code, DATE_FORMAT(e.date_of_joining, '%d-%b-%Y') AS date_of_joining, ul2.user_name AS reviewer_name,
+        (CASE WHEN al.status_id = 1 THEN "Start" 
+                WHEN al.status_id = 2 THEN "Self Reviewed" 
+                WHEN al.status_id = 3 THEN "Completed" END) AS status, ac.appraisal_name, ac.is_active, 
+        CONCAT(DATE_FORMAT(ac.start_date, '%b-%Y'), ' to ', DATE_FORMAT(ac.end_date, '%b-%Y')) AS appraisal_cycle_dates, 
+        ul.user_name, mut.user_type, md.department_name, mdn.designation_name FROM appraisee_list al 
+        LEFT JOIN appraisal_cycle ac ON ac.appraisal_cycle_id = al.appraisal_cycle_id AND ac.is_deleted = 0
+        INNER JOIN employees e ON e.user_login_id = al.user_login_id AND e.is_deleted = 0
+        INNER JOIN user_login ul ON ul.user_login_id = al.user_login_id AND ul.is_deleted = 0
+        INNER JOIN m_user_type mut ON mut.m_user_type_id = ul.m_user_type_id AND mut.is_deleted = 0
+        LEFT JOIN m_designation mdn ON mdn.m_designation_id = e.m_designation_id AND mdn.is_deleted = 0
+        LEFT JOIN m_departments md ON md.m_department_id = e.m_department_id AND md.is_deleted = 0
+        LEFT JOIN user_login ul2 ON ul2.user_login_id = e.reporting_id AND ul2.is_deleted = 0
+
+        WHERE al.is_deleted = 0 AND al.appraisal_cycle_id = ${appraisal_cycle_id} AND al.user_login_id = ${user_login_id}`;
+
+        let [rows] = await db.execute(sql);
+
+        return rows;
+    },
 }
 
 module.exports = performanceModel;

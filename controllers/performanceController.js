@@ -150,7 +150,7 @@ const performanceController = {
             const data = await performanceModel.questions();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ error: err.message});
+            res.status(500).json({'msg': err.message});
         }
     },
     async saveGoal(req, res){
@@ -176,7 +176,7 @@ const performanceController = {
     },
     async saveSelfAppraisal(req, res){
 
-        const {responses, user_login_id} = req.body;
+        const {responses, user_login_id, appraisee_id, status_id} = req.body;
        
         try{
             for(let i = 0; i < responses.length; i++){
@@ -184,7 +184,10 @@ const performanceController = {
                 responses[i]['user_login_id'] = user_login_id;
 
                 await adodb.saveData("self_appraisal","self_appraisal_id", responses[i], req.user);
+
             }
+
+            await adodb.saveData("appraisee_list","appraisee_id", {appraisee_id, status_id}, req.user);
 
             res.status(200).json({"msg": "Successfully Submitted"});
         }
@@ -230,7 +233,7 @@ const performanceController = {
                 res.status(200).json(data);
             }
         } catch (err) {
-            res.status(500).json({ error: err.message});
+            res.status(500).json({'msg': err.message});
         }
     },
     async saveAppraiseelist(req, res){
@@ -247,6 +250,14 @@ const performanceController = {
         }
         catch(err){
             res.status(400).json({"msg":err.message});
+        }
+    },
+    async viewAppraisee(req, res){
+        try {
+            const data = await performanceModel.viewAppraisee(req);
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(400).json({'msg': err.message});
         }
     },
 }

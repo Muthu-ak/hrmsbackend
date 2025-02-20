@@ -13,5 +13,6 @@ router.post('/saveGoal', performanceController.saveGoal);
 
 router.get('/questions', performanceController.questions);
 router.post('/saveSelfAppraisal', performanceController.saveSelfAppraisal);
+router.get('/viewAppraisee', performanceController.viewAppraisee);
 
 module.exports = router;

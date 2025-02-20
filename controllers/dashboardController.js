@@ -18,7 +18,7 @@ const dashboardController = {
                 adminCard:adminCard
             });
         } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ msg: err.message});
         }
     },
     async attendance(req, res){
