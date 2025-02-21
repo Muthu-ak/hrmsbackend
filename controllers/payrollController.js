@@ -8,8 +8,7 @@ const payrollController = {
         let cal = (params.currentpage - 1) * params.postperpage;
         let offset = cal < 0 ? 0 : cal;
         let where = "";
-        
-      
+    
         const logger_type_id = req.user.m_user_type_id;
         const logger_id = req.user.user_login_id;
 

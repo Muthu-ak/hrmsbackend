@@ -125,8 +125,15 @@ const masterModel = {
       return rows;
 
     },
-   async appraisalCycle(){
-      let [rows] = await db.execute("SELECT CAST(ac.appraisal_cycle_id AS CHAR) AS 'value' , ac.appraisal_name AS 'label', ac.is_active FROM appraisal_cycle ac WHERE ac.is_deleted = 0");
+   async appraisalCycle(req){
+      let join = "";
+
+      if(req.query.hasOwnProperty("user_login_id") && req.query.user_login_id > 0){
+         join = ` INNER JOIN appraisee_list al ON al.appraisal_cycle_id = ac.appraisal_cycle_id 
+         AND al.is_deleted = 0 AND al.user_login_id = ${req.query.user_login_id}`;
+      }
+
+      let [rows] = await db.execute(`SELECT CAST(ac.appraisal_cycle_id AS CHAR) AS 'value' , ac.appraisal_name AS 'label', ac.is_active FROM appraisal_cycle ac ${join} WHERE ac.is_deleted = 0`);
       return rows;
    },
    async tasks(project_id){
@@ -139,6 +146,31 @@ const masterModel = {
       WHERE pm.is_deleted = 0 AND pm.project_id = ? `, [project_id]);
       return rows;
    },
+   async recursiveUser(user_login_id, is_include_login_user = false){
+
+      let where = "";
+
+      if(!is_include_login_user){
+         where = `WHERE user_login_id <> ${user_login_id}`;
+      }
+   
+      const sql = `WITH RECURSIVE user_table AS (
+         SELECT ul.user_login_id FROM user_login ul 
+         LEFT JOIN employees e ON e.user_login_id = ul.user_login_id AND e.is_deleted = 0
+         WHERE ul.user_login_id = ${user_login_id} AND ul.is_deleted = 0
+         UNION ALL 
+         SELECT ul.user_login_id FROM user_login ul 
+         LEFT JOIN employees e ON e.user_login_id = ul.user_login_id AND e.is_deleted = 0
+         JOIN user_table ut ON ut.user_login_id = e.reporting_id
+         WHERE ul.is_deleted = 0 
+      ) SELECT * FROM user_table ${where}`;
+
+      let [rows] = await db.execute(sql);
+
+      const userLoginIds = rows.map(item => item.user_login_id).join(',');
+
+      return userLoginIds;
+   }
 }
 
 module.exports = masterModel;

@@ -65,11 +65,16 @@ const performanceModel = {
 
         return _result;
     },
-    async questions(){
+    async questions(req){
 
-        let sql = `SELECT ROW_NUMBER() OVER(ORDER BY com.created_by) as s_no,  com.compentency_id,
-        com.compentency_name, com.weightage FROM compentency com WHERE com.is_deleted = 0`;
-    
+        const {appraisal_cycle_id, user_login_id} = req.query;
+
+        let sql = `SELECT ROW_NUMBER() OVER(ORDER BY com.created_by) as s_no, com.compentency_id,
+        com.compentency_name, com.weightage, sa.self_appraisal_id, sa.user_rating, 
+        sa.user_comment, sa.reviewer_rating, sa.reviewer_comment FROM compentency com 
+        LEFT JOIN self_appraisal sa ON sa.compentency_id = com.compentency_id AND sa.is_deleted = 0 
+        AND sa.appraisal_cycle_id = ${appraisal_cycle_id} AND sa.user_login_id = ${user_login_id} WHERE com.is_deleted = 0`;
+
         let [rows] = await db.execute(sql);
 
         return rows;
@@ -93,7 +98,7 @@ const performanceModel = {
         }
 
         const sql = `SELECT ROW_NUMBER() OVER(${orderBY}) as s_no,  ${excel_not_include_fields} 
-        al.overall_score, ul.user_name, mut.user_type, mdn.designation_name, md.department_name, 
+        al.overall_score, al.self_score, ul.user_name, mut.user_type, mdn.designation_name, md.department_name, 
         (CASE WHEN al.status_id = 1 THEN "Start" 
         WHEN al.status_id = 2 THEN "Self Reviewed" 
         WHEN al.status_id = 3 THEN "Completed" END) AS status,
@@ -110,8 +115,8 @@ const performanceModel = {
 
         const {appraisal_cycle_id, user_login_id} = req.query;
 
-        const sql = `SELECT al.appraisee_id, al.appraisal_cycle_id, al.user_login_id, al.overall_score, al.status_id,
-        e.emp_code, DATE_FORMAT(e.date_of_joining, '%d-%b-%Y') AS date_of_joining, ul2.user_name AS reviewer_name,
+        const sql = `SELECT al.appraisee_id, al.appraisal_cycle_id, al.user_login_id, al.overall_score, al.self_score, al.status_id, ac.is_publish,
+        e.emp_code, DATE_FORMAT(e.date_of_joining, '%d-%b-%Y') AS date_of_joining, ul2.user_name AS reviewer_name, e.reporting_id,
         (CASE WHEN al.status_id = 1 THEN "Start" 
                 WHEN al.status_id = 2 THEN "Self Reviewed" 
                 WHEN al.status_id = 3 THEN "Completed" END) AS status, ac.appraisal_name, ac.is_active, 

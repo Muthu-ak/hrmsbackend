@@ -7,7 +7,7 @@ const masterController = {
             const data = await masterModel.userType(m_user_type_id);
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async department(req, res){
@@ -15,7 +15,7 @@ const masterController = {
             const data = await masterModel.department();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async designation(req, res){
@@ -27,7 +27,7 @@ const masterController = {
             const data = await masterModel.designation(m_department_id);
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async employeeStatus(req, res){
@@ -35,7 +35,7 @@ const masterController = {
             const data = await masterModel.employeeStatus();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async attendanceStatus(req, res){
@@ -43,7 +43,7 @@ const masterController = {
             const data = await masterModel.attendanceStatus();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async leaveStatus(req, res){
@@ -51,7 +51,7 @@ const masterController = {
             const data = await masterModel.leaveStatus();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async leaveType(req, res){
@@ -59,7 +59,7 @@ const masterController = {
             const data = await masterModel.leaveType();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async leaveYear(req, res){
@@ -67,7 +67,7 @@ const masterController = {
             const data = await masterModel.leaveYear();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async userList(req, res){
@@ -76,7 +76,7 @@ const masterController = {
             const data = await masterModel.userList(req.query, m_user_type_id);
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async reportingList(req, res){
@@ -96,7 +96,7 @@ const masterController = {
             const data = await masterModel.userList(obj);
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async employeeList(req, res){
@@ -121,7 +121,7 @@ const masterController = {
 
             res.status(200).json({gender, bloodGroup, userType, department, employeeStatus, banks, bankAccountType, documentNames});
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async clients(req, res){
@@ -129,7 +129,7 @@ const masterController = {
             const data = await masterModel.clients();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async projects(req, res){
@@ -158,7 +158,7 @@ const masterController = {
             }
             res.status(200).json({data, selected_id});
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async projectStatus(req, res){
@@ -166,12 +166,12 @@ const masterController = {
             const data = await masterModel.projectStatus();
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err });
+            res.status(500).json({ "msg":err.message });
         }
     },
     async appraisalCycle(req, res){
         try {
-            const result = await masterModel.appraisalCycle();
+            const result = await masterModel.appraisalCycle(req);
             let data = [], selected_id = null;
             result.forEach((item, index)=>{
                 data[index] = {
@@ -187,7 +187,7 @@ const masterController = {
             });
             res.status(200).json({data, selected_id});
         } catch (err) {
-            res.status(500).json({ "msg":err});
+            res.status(500).json({ "msg":err.message});
         }
     },
     async tasks(req, res){
@@ -198,7 +198,7 @@ const masterController = {
             }
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err.message});
+            res.status(500).json({ "msg":err.message.message});
         }
     },
     async teamMembers(req, res){
@@ -209,7 +209,7 @@ const masterController = {
             }
             res.status(200).json(data);
         } catch (err) {
-            res.status(500).json({ "msg":err});
+            res.status(500).json({ "msg":err.message});
         }
     },
 

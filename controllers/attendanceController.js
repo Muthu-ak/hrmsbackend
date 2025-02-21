@@ -1,4 +1,5 @@
 const attendanceModel = require("../models/attendanceModel");
+const masterModel = require("../models/masterModel");
 const db = require("../config/db");
 const adodb = require('../adodb');
 const moment = require("moment");
@@ -10,6 +11,11 @@ const attendanceController = {
         let offset = cal < 0 ? 0 : cal;
         let where = "";
 
+        // Recursive user
+        const user_login_ids = await masterModel.recursiveUser(req.user.user_login_id, true);
+
+        where += ` AND ul.user_login_id IN (${user_login_ids}) `;
+   
         let orderBY = "ORDER BY att.attendance_date DESC";
         if (params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none') {
             if (params.sorting["accessor"] == "user_name") {

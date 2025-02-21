@@ -1,4 +1,5 @@
 const performanceModel = require("../models/performanceModel");
+const masterModel = require("../models/masterModel");
 const adodb = require('../adodb');
 const moment = require('moment');
 const db = require('../config/db');
@@ -147,7 +148,7 @@ const performanceController = {
     },
     async questions(req, res){
         try {
-            const data = await performanceModel.questions();
+            const data = await performanceModel.questions(req);
             res.status(200).json(data);
         } catch (err) {
             res.status(500).json({'msg': err.message});
@@ -176,7 +177,7 @@ const performanceController = {
     },
     async saveSelfAppraisal(req, res){
 
-        const {responses, user_login_id, appraisee_id, status_id} = req.body;
+        const {responses, user_login_id} = req.body;
        
         try{
             for(let i = 0; i < responses.length; i++){
@@ -187,7 +188,7 @@ const performanceController = {
 
             }
 
-            await adodb.saveData("appraisee_list","appraisee_id", {appraisee_id, status_id}, req.user);
+            await adodb.saveData("appraisee_list","appraisee_id", req.body, req.user);
 
             res.status(200).json({"msg": "Successfully Submitted"});
         }
@@ -205,6 +206,11 @@ const performanceController = {
             limit:""
         };
 
+        // Recursive user
+        const user_login_ids = await masterModel.recursiveUser(req.user.user_login_id);
+    
+         _obj['where'] = ` AND al.user_login_id IN (${user_login_ids}) `;
+
         if (params.hasOwnProperty('appraisal_cycle_id')) {
             _obj["where"] += ` AND al.appraisal_cycle_id = ${params.appraisal_cycle_id}`;
         }
@@ -217,7 +223,7 @@ const performanceController = {
             _obj["limit"] = `LIMIT ${params.postperpage} OFFSET ${offset}`;
         }
 
-        _obj["orderBY"] = "ORDER BY al.created_on DESC";
+        _obj["orderBY"] = "ORDER BY ul.user_name";
 
         if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
             _obj["orderBY"] = `ORDER BY al.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
