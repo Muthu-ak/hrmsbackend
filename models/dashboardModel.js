@@ -64,7 +64,7 @@ const dashboardModel = {
             JSON_OBJECT('title', 'Pending Leave Requests', 'count', (SELECT COUNT(CASE WHEN ul2.m_user_type_id = 100 THEN lr.leave_id END) FROM leave_requests lr INNER JOIN user_login ul2 ON ul2.user_login_id = lr.user_login_id AND ul2.is_deleted = 0 WHERE lr.is_deleted = 0 AND lr.m_leave_status_id = 1 ), 'icon', 'FaCalendarCheck', 'id', 'pending_leave_request_count')
         ) AS counts
         FROM user_login ul 
-        WHERE ul.is_deleted = 0 AND ul.m_user_type_id NOT IN (1000);`);
+        WHERE ul.is_deleted = 0 AND ul.m_user_type_id NOT IN (1000)`);
         return rows[0]['counts'];
     },
 

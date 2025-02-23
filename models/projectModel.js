@@ -32,20 +32,25 @@ const projectModel = {
 
         let joins = ` INNER JOIN clients c ON c.client_id = pt.client_id AND c.is_deleted = 0
         INNER JOIN user_login ul ON ul.user_login_id = pt.project_manager_id AND ul.is_deleted = 0
-        LEFT JOIN project_status ps ON ps.project_status_id = pt.project_status_id AND ps.is_deleted = 0 
-        LEFT JOIN project_members pm ON pm.project_id = pt.project_id AND pm.is_deleted = 0 `;
+        LEFT JOIN project_status ps ON ps.project_status_id = pt.project_status_id AND ps.is_deleted = 0`;
 
         if(!isExcel){
             excel_not_include_fields = "pt.project_id, pt.project_status_id, ps.status_color, ";
-            let [count] = await db.execute(`SELECT COUNT(pt.project_id) AS counts FROM projects pt ${joins} WHERE pt.is_deleted = 0 ${where} GROUP BY pt.project_id`);
+            let [count] = await db.execute(`SELECT COUNT(pt.project_id) AS counts FROM projects pt ${joins} WHERE pt.is_deleted = 0 ${where}`);
             _result['totalRecord'] = count[0]['counts'];
         }
-        
-        let [rows] = await db.execute(`SELECT ROW_NUMBER() OVER(${orderBY}) as s_no, ${excel_not_include_fields} pt.project_name, pt.project_description, 
+
+        const sql = `SELECT ROW_NUMBER() OVER(${orderBY}) as s_no, ${excel_not_include_fields} pt.project_name, pt.project_description, 
         c.client_name, ul.user_name AS project_manager,
         DATE_FORMAT(pt.start_date, "%d-%b-%Y") AS start_date, DATE_FORMAT(pt.end_date, "%d-%b-%Y") AS end_date, 
-        pt.project_value,  ps.project_status
-        FROM projects pt ${joins} WHERE pt.is_deleted = 0 ${where} GROUP BY pt.project_id ${limit}`);
+        pt.project_value,  ps.project_status,
+        (SELECT COUNT(pm.project_member_id) FROM project_members pm WHERE pm.project_id = pt.project_id AND pm.is_deleted = 0) AS members,
+		(SELECT COUNT(ts.task_id) FROM tasks ts WHERE ts.project_id = pt.project_id AND ts.is_deleted = 0) AS tasks,
+		(SELECT SEC_TO_TIME(SUM(TIME_TO_SEC(tm.task_duration)))  FROM timesheets tm WHERE tm.project_id = pt.project_id AND tm.is_deleted = 0) AS work_done
+        FROM projects pt ${joins} WHERE pt.is_deleted = 0 ${where} GROUP BY pt.project_id ${limit}`;
+        
+        let [rows] = await db.execute(sql);
+    
         _result['data'] = rows;
 
         return _result;
