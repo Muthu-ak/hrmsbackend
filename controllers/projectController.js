@@ -117,22 +117,6 @@ const projectController = {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     },
-
-    async projectDetails(req, res){
-        try {
-            const basic = await projectModel.viewProject(req.query);
-            const teamMembers = await projectModel.teamMembers(req.query);
-
-            res.status(200).json({
-                basic:basic.length > 0 ? basic[0] : null,
-                teamMembers:teamMembers.length > 0 ? teamMembers : null,
-            });
-            
-        } catch (err) {
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-    },
-
     async teamMembers(req, res){
         let params = req.query;
         let cal = (params.currentpage - 1) * params.postperpage;

@@ -11,8 +11,6 @@ router.get('/projects', projectController.projects);
 router.post('/saveProject', projectController.saveProject);
 router.get('/viewProject', projectController.viewProject);
 
-router.get('/projectDetails', projectController.projectDetails);
-
 router.post('/saveTeamMember', projectController.saveTeamMember);
 router.get('/teamMembers', projectController.teamMembers);
 
