@@ -32,7 +32,8 @@ const projectModel = {
 
         let joins = ` INNER JOIN clients c ON c.client_id = pt.client_id AND c.is_deleted = 0
         INNER JOIN user_login ul ON ul.user_login_id = pt.project_manager_id AND ul.is_deleted = 0
-        LEFT JOIN project_status ps ON ps.project_status_id = pt.project_status_id AND ps.is_deleted = 0`;
+        LEFT JOIN project_status ps ON ps.project_status_id = pt.project_status_id AND ps.is_deleted = 0
+        LEFT JOIN project_members pm ON pm.project_id = pt.project_id AND pm.is_deleted = 0`;
 
         if(!isExcel){
             excel_not_include_fields = "pt.project_id, pt.project_status_id, ps.status_color, ";

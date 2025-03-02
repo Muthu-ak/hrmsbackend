@@ -8,8 +8,6 @@ router.get('/appraiseelist', performanceController.appraiseelist);
 router.post('/saveAppraiseelist', performanceController.saveAppraiseelist);
 router.get('/competency', performanceController.competency);
 router.post('/saveCompetency', performanceController.saveCompetency);
-router.get('/goal', performanceController.goal);
-router.post('/saveGoal', performanceController.saveGoal);
 
 router.get('/questions', performanceController.questions);
 router.post('/saveSelfAppraisal', performanceController.saveSelfAppraisal);

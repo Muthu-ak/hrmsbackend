@@ -271,6 +271,12 @@ const projectController = {
             }
         }
 
+        const m_user_type_id = req.user.m_user_type_id;
+
+        if(m_user_type_id == 1){
+            _obj["where"] += ` AND ul.user_login_id = ${req.user.user_login_id}`;
+        }
+
         if(!_obj.isExcel){
 
             let cal = (params.currentpage - 1) * params.postperpage;

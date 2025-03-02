@@ -72,28 +72,45 @@ const masterController = {
     },
     async userList(req, res){
         try {
-            let m_user_type_id = req.user.m_user_type_id;
-            const data = await masterModel.userList(req.query, m_user_type_id);
-            res.status(200).json(data);
+            let where = "";
+
+            const under_employee_ids = await masterModel.recursiveUser(req.user.user_login_id);
+          
+            if(under_employee_ids){
+                where += ` AND ul.user_login_id IN (${under_employee_ids})`;
+
+                if(req.query.hasOwnProperty("m_user_type_id")){
+                    where += ` AND ul.m_user_type_id IN (${req.query.m_user_type_id}) `;
+                }
+                
+                const data = await masterModel.userList(where);
+         
+                res.status(200).json(data);
+            }
+            else{
+                res.status(200).json([]);
+            }
+
+          
         } catch (err) {
             res.status(500).json({ "msg":err.message });
         }
     },
     async reportingList(req, res){
-        let obj = {};
+        let where = "";
         switch(req.query.m_user_type_id){
             case '1':
-                obj["m_user_type_id"] = 20;
+                where = ` AND ul.m_user_type_id IN (20) `;
                 break;
             case '20':
-                obj["m_user_type_id"] = 100;
+                where = ` AND ul.m_user_type_id IN (100) `;
                 break;
             default:
-                obj["m_user_type_id"] = 1000;
+                where = ` AND ul.m_user_type_id IN (1000) `;
                 break;
         }
         try {
-            const data = await masterModel.userList(obj);
+            const data = await masterModel.userList(where);
             res.status(200).json(data);
         } catch (err) {
             res.status(500).json({ "msg":err.message });
@@ -140,21 +157,26 @@ const masterController = {
         if(m_user_type_id == 20){
             where = ` AND project_manager_id = ${user_login_id}`;
         }
+        else if(m_user_type_id == 1){
+            where = ` AND pm.user_login_id = ${user_login_id}`;
+        }
 
         try {
             const data = await masterModel.projects(where);
             let selected_id = null;
-            if(req.query.project_id == null){
-                selected_id = data[0]['value'];
-                data[0] = {...data[0], selected:true};
-            }
-            else{
-                data.forEach((item, index)=>{
-                    if(req.query.project_id == item.value){
-                        selected_id = data[index]['project_id'];
-                        data[index] = {...data[index], selected:true};
-                    }
-                });
+            if(data.length > 0){
+                if(req.query.project_id == null){
+                    selected_id = data[0]['value'];
+                    data[0] = {...data[0], selected:true};
+                }
+                else{
+                    data.forEach((item, index)=>{
+                        if(req.query.project_id == item.value){
+                            selected_id = data[index]['project_id'];
+                            data[index] = {...data[index], selected:true};
+                        }
+                    });
+                }
             }
             res.status(200).json({data, selected_id});
         } catch (err) {
@@ -202,8 +224,20 @@ const masterController = {
         }
     },
     async teamMembers(req, res){
+        let where = "";
+        if(req.query.hasOwnProperty('project_id')){
+            where += ` AND pm.project_id = ${req.query.project_id}`;
+        }
+        
+        const m_user_type_id = req.user.m_user_type_id;
+
+        if(m_user_type_id == 1){
+            where += ` AND pm.user_login_id = ${req.user.user_login_id}`;
+        }
+
         try {
-            const data = await masterModel.teamMembers(req.query.project_id);
+
+            const data = await masterModel.teamMembers(where);
             if(data.length > 0){
                 data.unshift({'label':'All Members', "value":"-1"});
             }

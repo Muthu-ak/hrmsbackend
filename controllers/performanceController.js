@@ -120,59 +120,12 @@ const performanceController = {
             res.status(400).json({"msg":err});
         }
     },
-    async goal(req, res){
-        let params = req.query;
-
-        let _obj = {
-            where:"",
-            limit:""
-        };
-
-        let cal = (params.currentpage - 1) * params.postperpage;
-        let offset = cal < 0 ? 0 : cal;
-
-        _obj["limit"] = `LIMIT ${params.postperpage} OFFSET ${offset}`;
-
-        _obj["orderBY"] = "ORDER BY gl.created_on DESC";
-
-        if(params.hasOwnProperty("sorting") && params.sorting['direction'] != 'none'){
-            _obj["orderBY"] = `ORDER BY gl.${params.sorting["accessor"]} ${params.sorting["direction"]}`;
-        }
-
-        try {
-            const data = await performanceModel.goal(_obj);
-            res.status(200).json(data);
-        } catch (err) {
-            res.status(500).json({ error: err.message});
-        }
-    },
     async questions(req, res){
         try {
             const data = await performanceModel.questions(req);
             res.status(200).json(data);
         } catch (err) {
             res.status(500).json({'msg': err.message});
-        }
-    },
-    async saveGoal(req, res){
-        let pk = req.body.goal_id;
-
-        if(req.body.hasOwnProperty('goal_date')){
-            req.body['start_date'] = moment(req.body['goal_date'][0]).format("YYYY-MM-DD");
-            req.body['end_date'] = moment(req.body['goal_date'][1]).format("YYYY-MM-DD");
-        }
-        
-        try{
-            let id = await adodb.saveData("goal","goal_id", req.body, req.user);
-
-            let msg = req.body.hasOwnProperty('is_deleted') ? "Deleted Successfully" : (pk < 0) ? "Added Successfully" : "Updated Successfully";
-
-            let code = pk > 0 ? 200 : 201;
-
-            res.status(code).json({'goal_id': id, "msg": msg});
-        }
-        catch(err){
-            res.status(400).json({"msg":err});
         }
     },
     async saveSelfAppraisal(req, res){
@@ -208,8 +161,9 @@ const performanceController = {
 
         // Recursive user
         const user_login_ids = await masterModel.recursiveUser(req.user.user_login_id);
-    
-         _obj['where'] = ` AND al.user_login_id IN (${user_login_ids}) `;
+
+        _obj['where'] = ` AND al.user_login_id IN (${user_login_ids}) `;
+
 
         if (params.hasOwnProperty('appraisal_cycle_id')) {
             _obj["where"] += ` AND al.appraisal_cycle_id = ${params.appraisal_cycle_id}`;
@@ -230,7 +184,7 @@ const performanceController = {
         }
 
         try {
-            const data = await performanceModel.appraiseelist(_obj);
+            const data = user_login_ids ? await performanceModel.appraiseelist(_obj) : {'data':[], 'totalRecord':0};
             if(_obj.isExcel){
                 req.excelData = data;
                 next();
