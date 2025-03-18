@@ -60,9 +60,9 @@ const masterModel = {
         return rows;
     },
     async leaveYear(){
-      let [rows] = await db.execute(`SELECT CAST(YEAR(h.holiday_date) AS CHAR) AS 'value', 
-          CAST(YEAR(h.holiday_date) AS CHAR) AS label, IF(YEAR(h.holiday_date) = YEAR(NOW()), true, false) AS selected
-          FROM holiday h WHERE h.is_deleted = 0 GROUP BY YEAR(h.holiday_date)`);
+      let [rows] = await db.execute(`SELECT DISTINCT CAST(YEAR(h.holiday_date) AS CHAR) AS 'value', 
+      CAST(YEAR(h.holiday_date) AS CHAR) AS label, IF(YEAR(h.holiday_date) = YEAR(NOW()), true, false) AS selected
+      FROM holiday h WHERE h.is_deleted = 0`);
       return rows;
     },
     async clients(){

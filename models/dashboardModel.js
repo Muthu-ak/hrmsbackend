@@ -3,7 +3,7 @@ const db = require('../config/db');
 const dashboardModel = {
     async attendance(user_login_id){
         let [rows] = await db.execute(`SELECT a.attendance_id, a.punch_in, a.punch_out, a.m_attendance_status_id, 
-        (CASE WHEN a.punch_out > 0 THEN TIMEDIFF(a.punch_out, a.punch_in) ELSE 
+        (CASE WHEN a.punch_out IS NOT NULL THEN TIMEDIFF(a.punch_out, a.punch_in) ELSE 
         TIMEDIFF(TIME(NOW()), a.punch_in) END) AS total_hours FROM attendance a 
         WHERE a.is_deleted = 0 AND a.user_login_id = ? AND DATE(a.attendance_date) = DATE(NOW())`, [user_login_id]);
         return rows;

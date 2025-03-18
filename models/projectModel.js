@@ -86,7 +86,7 @@ const projectModel = {
         FROM project_members pm ${joins} 
         LEFT JOIN timesheets tm ON tm.project_id = pm.project_id AND tm.project_member_id = pm.project_member_id AND tm.is_deleted = 0
         WHERE pm.is_deleted = 0 ${where} GROUP BY pm.project_member_id  ${orderBY} ${limit}`;
-
+        
         let [rows] = await db.execute(sql);
 
         return {data:rows, totalRecord:count[0]['counts']};
