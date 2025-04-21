@@ -26,6 +26,7 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const payrollRoutes = require("./routes/payrollRoutes");
 const perfomanceRoutes = require("./routes/perfomanceRoutes");
+const organizationRoutes = require("./routes/organizationRoutes");
 const excelRoutes = require("./routes/excelRoutes");
 
 // Routes Setup
@@ -40,6 +41,7 @@ app.use('/dashboard', authMiddleware, dashboardRoutes);
 app.use('/attendance', authMiddleware, attendanceRoutes);
 app.use('/payroll', authMiddleware, payrollRoutes);
 app.use('/performance', authMiddleware, perfomanceRoutes);
+app.use('/organization', authMiddleware, organizationRoutes);
 app.use('/excel', authMiddleware, excelRoutes);
 
 app.listen(process.env.PORT, (err)=>{
